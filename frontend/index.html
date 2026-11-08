@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARKIQ | AI Intelligent Parking Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-glass-theme">
+    <div class="dashboard-layout">
+        <!-- Sleek Light Sidebar (Inspired by Reference) -->
+        <aside class="sidebar-container glass-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="5"/>
+                        <path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-title">PARK<span>IQ</span></h1>
+                    <span class="brand-badge">AI PARKING HUB</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">MONITORING</div>
+                <a href="#dashboard" class="nav-item active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
+                    <span>Control Center</span>
+                </a>
+                <a href="#digital-twin" class="nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    <span>Digital Twin 2D</span>
+                </a>
+                <a href="#cv-feed" class="nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    <span>YOLOv8 + ANPR</span>
+                </a>
+
+                <div class="nav-section-label">ANALYTICS & ALLOCATION</div>
+                <a href="#sessions" class="nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Active Sessions</span>
+                </a>
+                <a href="#routing" class="nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                    <span>A* Navigation</span>
+                </a>
+                <a href="javascript:void(0)" class="nav-item nav-item-muted" onclick="toggleSidebarCollapse()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                    <span>Hide Sidebar</span>
+                </a>
+            </nav>
+
+            <!-- Operator Profile & Sign Out Footer -->
+            <div class="sidebar-footer-container">
+                <div class="sidebar-user-card">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <span class="user-name">officer</span>
+                        <span class="user-role">Parking Control Officer</span>
+                    </div>
+                    <div class="user-arrow">›</div>
+                </div>
+
+                <button class="sidebar-signout-btn" onclick="alert('Session secured. System running in live mode.')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content-area">
+            <!-- Top Glass Header Bar -->
+            <header class="top-app-header glass-card" id="dashboard">
+                <div class="header-title-block">
+                    <div class="title-with-pill">
+                        <h2 class="page-title">Operational Parking Facility Overview</h2>
+                        <span class="live-status-pill"><span class="pulse-dot"></span> Live System</span>
+                    </div>
+                    <p class="page-desc">Real-time Computer Vision Tracking, ANPR Recognition & Digital Twin World Model</p>
+                </div>
+
+                <div class="header-controls">
+                    <!-- Date & Time Pill -->
+                    <div class="header-date-pill">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span id="header-date-str">Thursday, Sep 4, 2026</span>
+                        <span class="clock-divider">•</span>
+                        <strong id="live-clock">--:--:--</strong>
+                    </div>
+
+                    <!-- Tariff Badge -->
+                    <div class="header-tariff-pill">
+                        <span class="tariff-currency">₹</span>
+                        <span>TARIFF: <strong>20 / 30m</strong></span>
+                    </div>
+
+                    <!-- Mode Segmented Control -->
+                    <div class="mode-segmented-pill">
+                        <button class="mode-btn active" id="btn-real-mode" onclick="setSystemMode('REAL')">
+                            <span class="btn-dot"></span> REAL CV
+                        </button>
+                        <button class="mode-btn" id="btn-sim-mode" onclick="setSystemMode('SIMULATION')">
+                            <span class="btn-dot"></span> SIMULATION
+                        </button>
+                    </div>
+
+                    <!-- Action Icon Buttons (Search, Notification, Settings) -->
+                    <div class="header-icon-actions">
+                        <button class="header-circle-btn" title="Search Facility Records">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </button>
+                        <button class="header-circle-btn has-badge" title="Notifications & Alerts">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <span class="btn-notification-dot"></span>
+                        </button>
+                        <button class="header-circle-btn" title="System Settings">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPI Cards Strip (Matching Reference 1 & 2 Aesthetic) -->
+            <section class="kpi-grid-container">
+                <!-- Card 1: Total Capacity -->
+                <div class="kpi-glass-card kpi-card-emerald">
+                    <div class="kpi-card-header">
+                        <span class="kpi-category">FACILITY CAPACITY</span>
+                        <div class="kpi-icon-pill icon-emerald">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-main-metric">
+                        <span class="kpi-number" id="kpi-total">28</span>
+                        <span class="kpi-subtext">Total Configured Bays</span>
+                    </div>
+                    <div class="kpi-sparkline-container">
+                        <svg class="kpi-sparkline-svg" viewBox="0 0 120 28" preserveAspectRatio="none">
+                            <path d="M0,22 Q20,10 40,16 T80,8 T120,18 L120,28 L0,28 Z" fill="rgba(16, 185, 129, 0.12)"></path>
+                            <path d="M0,22 Q20,10 40,16 T80,8 T120,18" fill="none" stroke="#10b981" stroke-width="2"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-footer-status">
+                        <span class="status-chip chip-emerald">100% Monitored</span>
+                        <span class="kpi-action-link">View bays ➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Available Slots -->
+                <div class="kpi-glass-card kpi-card-sky">
+                    <div class="kpi-card-header">
+                        <span class="kpi-category">AVAILABLE BAYS</span>
+                        <div class="kpi-icon-pill icon-sky">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-main-metric">
+                        <span class="kpi-number text-sky" id="kpi-available">28</span>
+                        <span class="kpi-subtext">Ready for Allocation</span>
+                    </div>
+                    <div class="kpi-sparkline-container">
+                        <svg class="kpi-sparkline-svg" viewBox="0 0 120 28" preserveAspectRatio="none">
+                            <path d="M0,18 Q30,6 60,18 T120,10 L120,28 L0,28 Z" fill="rgba(2, 132, 199, 0.12)"></path>
+                            <path d="M0,18 Q30,6 60,18 T120,10" fill="none" stroke="#0284c7" stroke-width="2"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-footer-status">
+                        <span class="status-chip chip-sky">Immediate Entry</span>
+                        <span class="kpi-action-link">Allocate ➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Occupied Slots -->
+                <div class="kpi-glass-card kpi-card-rose">
+                    <div class="kpi-card-header">
+                        <span class="kpi-category">OCCUPIED BAYS</span>
+                        <div class="kpi-icon-pill icon-rose">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-main-metric">
+                        <span class="kpi-number text-rose" id="kpi-occupied">0</span>
+                        <span class="kpi-subtext">Parked Vehicles</span>
+                    </div>
+                    <div class="kpi-sparkline-container">
+                        <svg class="kpi-sparkline-svg" viewBox="0 0 120 28" preserveAspectRatio="none">
+                            <path d="M0,24 Q30,12 60,20 T120,6 L120,28 L0,28 Z" fill="rgba(244, 63, 94, 0.12)"></path>
+                            <path d="M0,24 Q30,12 60,20 T120,6" fill="none" stroke="#f43f5e" stroke-width="2"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-footer-status">
+                        <span class="status-chip chip-rose" id="kpi-occupied-badge">Active Sessions</span>
+                        <span class="kpi-action-link">Live feed ➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Occupancy Rate -->
+                <div class="kpi-glass-card kpi-card-amber">
+                    <div class="kpi-card-header">
+                        <span class="kpi-category">OCCUPANCY RATE</span>
+                        <div class="kpi-icon-pill icon-amber">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-main-metric">
+                        <span class="kpi-number text-amber" id="kpi-rate">0.0%</span>
+                        <span class="kpi-subtext">Facility Utilization</span>
+                    </div>
+                    <div class="kpi-progress-bar">
+                        <div class="kpi-progress-fill" id="kpi-progress-bar" style="width: 0%;"></div>
+                    </div>
+                    <div class="kpi-footer-status" style="margin-top: 10px;">
+                        <span class="status-chip chip-amber">Optimal Flow</span>
+                        <span class="kpi-action-link">Analytics ➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 5: Revenue Collected -->
+                <div class="kpi-glass-card kpi-card-indigo">
+                    <div class="kpi-card-header">
+                        <span class="kpi-category">TOTAL REVENUE</span>
+                        <div class="kpi-icon-pill icon-indigo" style="font-weight: 800; font-size: 15px;">
+                            ₹
+                        </div>
+                    </div>
+                    <div class="kpi-main-metric">
+                        <span class="kpi-number text-indigo" id="kpi-revenue">₹0</span>
+                        <span class="kpi-subtext">₹20 / 30 mins block</span>
+                    </div>
+                    <div class="kpi-sparkline-container">
+                        <svg class="kpi-sparkline-svg" viewBox="0 0 120 28" preserveAspectRatio="none">
+                            <path d="M0,20 Q25,8 50,14 T100,6 T120,12 L120,28 L0,28 Z" fill="rgba(99, 102, 241, 0.12)"></path>
+                            <path d="M0,20 Q25,8 50,14 T100,6 T120,12" fill="none" stroke="#6366f1" stroke-width="2"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-footer-status">
+                        <span class="status-chip chip-indigo" id="kpi-turnover-badge">0 Vehicles Today</span>
+                        <span class="kpi-action-link">Tariffs ➔</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Interactive Workspace Grid -->
+            <section class="workspace-grid-two-col">
+                <!-- Left: Digital Twin 2D Facility with Realistic Cars & Animated Routes -->
+                <div class="digital-twin-panel glass-card" id="digital-twin">
+                    <div class="panel-header-strip">
+                        <div class="panel-heading-group">
+                            <h3 class="panel-title">LIVE DIGITAL TWIN (2D FACILITY WORLD MODEL)</h3>
+                            <span class="panel-subtitle">A* Navigation Route Optimizer & Dynamic Vehicle Positioning • <strong style="color: #0284c7;">💡 Click any parked vehicle to exit it</strong></span>
+                        </div>
+                        <div class="twin-legend-row">
+                            <span class="legend-badge"><span class="legend-dot dot-avail"></span> Free (Available)</span>
+                            <span class="legend-badge"><span class="legend-dot dot-occ"></span> Occupied (Parked)</span>
+                            <span class="legend-badge"><span class="legend-dot dot-route"></span> A* Route</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Multi-Floor Switcher Bar (First Floor vs Second Floor) -->
+                    <div class="floor-switch-bar">
+                        <div class="floor-toggle-group">
+                            <button class="floor-btn active" id="btn-floor-f1" onclick="switchFloor('F1')">
+                                <span class="floor-btn-icon">🏢</span> FIRST FLOOR (F1)
+                                <span class="floor-btn-badge" id="badge-floor-f1">28 Bays</span>
+                            </button>
+                            <button class="floor-btn" id="btn-floor-f2" onclick="switchFloor('F2')">
+                                <span class="floor-btn-icon">🏢</span> SECOND FLOOR (F2)
+                                <span class="floor-btn-badge" id="badge-floor-f2">28 Bays</span>
+                            </button>
+                        </div>
+                        <div class="floor-status-indicator">
+                            <span class="current-floor-pill" id="current-floor-pill">VIEWING: <strong>FIRST FLOOR (F1)</strong></span>
+                            <span class="floor-ramps-pill">⚡ Dual-Level Ramps: SLOPE UP (F1→F2) &amp; SLOPE DOWN (F2→F1) Active</span>
+                        </div>
+                    </div>
+
+                    <div class="twin-canvas-wrapper">
+                        <canvas id="twinCanvas" width="960" height="720"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: CV Camera Telemetry, Real-time Recognition & Controls -->
+                <div class="cv-telemetry-panel glass-card" id="cv-feed">
+                    <div class="panel-header-strip">
+                        <div class="panel-heading-group">
+                            <h3 class="panel-title">LIVE COMPUTER VISION TELEMETRY</h3>
+                            <span class="panel-subtitle" id="cv-source-badge">CAM_01 GATE IN (YOLOv8 + EASYOCR)</span>
+                        </div>
+                        <span class="live-pulse-badge"><span class="pulse-dot"></span> LIVE CV</span>
+                    </div>
+
+                    <!-- HUD Telemetry Card -->
+                    <div class="telemetry-hud-card">
+                        <div class="hud-item-box">
+                            <span class="hud-field-name">TRACK ID:</span>
+                            <span class="hud-field-val text-blue" id="hud-track-id">#--</span>
+                        </div>
+                        <div class="hud-item-box">
+                            <span class="hud-field-name">DETECTED PLATE:</span>
+                            <span class="hud-field-val plate-highlight" id="hud-plate">NO VEHICLE</span>
+                        </div>
+                        <div class="hud-item-box">
+                            <span class="hud-field-name">OCR CONFIDENCE:</span>
+                            <span class="hud-field-val" id="hud-ocr-conf">--%</span>
+                        </div>
+                        <div class="hud-item-box">
+                            <span class="hud-field-name">ASSIGNED BAY:</span>
+                            <span class="hud-field-val text-emerald" id="hud-assigned-slot">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Photo Upload Test Zone (YOLOv8 + ANPR Automatic Recognition) -->
+                    <div class="vehicle-upload-card" id="uploadCard">
+                        <input type="file" id="vehicleFileInput" accept="image/*,video/*" style="display: none;" onchange="handleVehicleFileUpload(event)">
+                        <div class="upload-dropzone" id="uploadDropzone" onclick="document.getElementById('vehicleFileInput').click()">
+                            <div class="upload-icon-circle">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <div class="upload-text-block">
+                                <div class="upload-primary-text">Upload Car Photo for Detection</div>
+                                <div class="upload-sub-text">Drop or select car photo to test YOLOv8 & allocation</div>
+                            </div>
+                            <button class="upload-browse-btn" type="button" onclick="event.stopPropagation(); document.getElementById('vehicleFileInput').click()">Upload Car</button>
+                        </div>
+
+                        <!-- Live Detection Camera Snapshot Preview & Automated Confirmation -->
+                        <div id="uploadPreviewWrap" class="upload-preview-wrap hidden">
+                            <div class="preview-img-container">
+                                <img id="uploadPreviewImg" src="" alt="YOLOv8 Detection Feed">
+                                <span class="preview-live-tag">YOLOv8n + ANPR AUTO-VERIFIED</span>
+                            </div>
+                            <div class="preview-meta-row">
+                                <span id="preview-meta-badge" class="preview-meta-badge">Plate: --</span>
+                                <button class="btn-clear-preview" type="button" onclick="clearUploadPreview(event)">✕ Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulation Control Buttons -->
+                    <div class="sim-control-box" id="simActionsPanel">
+                        <div class="sim-control-label">SIMULATION TEST DISPATCHER:</div>
+                        <div class="sim-btn-row">
+                            <button class="sim-btn btn-entry" onclick="triggerSimAction('entry')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span>Simulate Entry</span>
+                            </button>
+                            <button class="sim-btn btn-park" onclick="triggerSimAction('park')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Park in Bay</span>
+                            </button>
+                            <button class="sim-btn btn-exit" onclick="triggerSimAction('exit')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                                <span>Simulate Exit</span>
+                            </button>
+                            <button class="sim-btn btn-reset" onclick="triggerSimAction('reset')" title="Clear all allocations and reset all 56 bays to General Free" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                <span>Reset All Free</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Activity & Violation Log Feed -->
+                    <div class="activity-log-section">
+                        <h4 class="activity-header-title">REAL-TIME SYSTEM ACTIVITY & ALERT STREAM</h4>
+                        <div class="activity-feed-scroll" id="activityFeed">
+                            <div class="activity-feed-entry">
+                                <span class="entry-time">SYSTEM</span>
+                                <span class="entry-desc">Digital Twin synchronized with backend API.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom: Active Sessions & Explainable Allocation Table -->
+            <section class="sessions-table-panel glass-card" id="sessions">
+                <div class="panel-header-strip">
+                    <div class="panel-heading-group">
+                        <h3 class="panel-title">ACTIVE VEHICLE SESSIONS & LIVE TARIFF BILLING</h3>
+                        <span class="panel-subtitle">Real-time stay duration & billing calculation at ₹20 per 30 mins</span>
+                    </div>
+                </div>
+
+                <div class="table-responsive-container">
+                    <table class="modern-light-table">
+                        <thead>
+                            <tr>
+                                <th>SESSION ID</th>
+                                <th>TRACK ID</th>
+                                <th>LICENSE PLATE</th>
+                                <th>VEHICLE TYPE</th>
+                                <th>ENTRY TIME</th>
+                                <th>STAY DURATION</th>
+                                <th>ASSIGNED BAY</th>
+                                <th>PARKING FEE</th>
+                                <th>SESSION STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionsTableBody">
+                            <tr>
+                                <td colspan="10" class="empty-table-msg">No active vehicles currently tracked in the facility.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Interactive A* Navigation & Pathfinding Explorer Panel -->
+            <section class="routing-panel glass-card" id="routing">
+                <div class="panel-header-strip">
+                    <div class="panel-heading-group">
+                        <h3 class="panel-title">A* NAVIGATION ROUTE OPTIMIZER & SHORTEST PATH FINDER</h3>
+                        <span class="panel-subtitle">100% Orthogonal rectilinear aisle routing with waypoint guidance</span>
+                    </div>
+                </div>
+
+                <div class="routing-controls-grid">
+                    <div class="route-input-group">
+                        <label class="route-label">START NODE / WAYPOINT:</label>
+                        <select id="route-start-select" class="route-select">
+                            <option value="ENTRANCE" selected>ENTRANCE (Gate In - CAM_01)</option>
+                            <option value="F2_ENTRY">F2 Ramp Entry (Floor 2 Bottom Highway)</option>
+                            <optgroup label="🏢 First Floor (F1)">
+                                <option value="F1-S01">Bay F1-S01</option>
+                                <option value="F1-S02">Bay F1-S02</option>
+                                <option value="F1-S03">Bay F1-S03</option>
+                                <option value="F1-S04">Bay F1-S04</option>
+                                <option value="F1-S05">Bay F1-S05</option>
+                                <option value="F1-S06">Bay F1-S06</option>
+                                <option value="F1-S07">Bay F1-S07</option>
+                                <option value="F1-S08">Bay F1-S08</option>
+                                <option value="F1-S09">Bay F1-S09</option>
+                                <option value="F1-S10">Bay F1-S10</option>
+                                <option value="F1-S11">Bay F1-S11</option>
+                                <option value="F1-S12">Bay F1-S12</option>
+                                <option value="F1-S13">Bay F1-S13</option>
+                                <option value="F1-S14">Bay F1-S14</option>
+                                <option value="F1-S15">Bay F1-S15</option>
+                                <option value="F1-S16">Bay F1-S16</option>
+                                <option value="F1-S17">Bay F1-S17</option>
+                                <option value="F1-S18">Bay F1-S18</option>
+                                <option value="F1-S19">Bay F1-S19</option>
+                                <option value="F1-S20">Bay F1-S20</option>
+                                <option value="F1-S21">Bay F1-S21</option>
+                                <option value="F1-S22">Bay F1-S22</option>
+                                <option value="F1-S23">Bay F1-S23</option>
+                                <option value="F1-S24">Bay F1-S24</option>
+                                <option value="F1-S25">Bay F1-S25</option>
+                                <option value="F1-S26">Bay F1-S26</option>
+                                <option value="F1-S27">Bay F1-S27</option>
+                                <option value="F1-S28">Bay F1-S28</option>
+                            </optgroup>
+                            <optgroup label="🏢 Second Floor (F2)">
+                                <option value="F2-S01">Bay F2-S01</option>
+                                <option value="F2-S02">Bay F2-S02</option>
+                                <option value="F2-S03">Bay F2-S03</option>
+                                <option value="F2-S04">Bay F2-S04</option>
+                                <option value="F2-S05">Bay F2-S05</option>
+                                <option value="F2-S06">Bay F2-S06</option>
+                                <option value="F2-S07">Bay F2-S07</option>
+                                <option value="F2-S08">Bay F2-S08</option>
+                                <option value="F2-S09">Bay F2-S09</option>
+                                <option value="F2-S10">Bay F2-S10</option>
+                                <option value="F2-S11">Bay F2-S11</option>
+                                <option value="F2-S12">Bay F2-S12</option>
+                                <option value="F2-S13">Bay F2-S13</option>
+                                <option value="F2-S14">Bay F2-S14</option>
+                                <option value="F2-S15">Bay F2-S15</option>
+                                <option value="F2-S16">Bay F2-S16</option>
+                                <option value="F2-S17">Bay F2-S17</option>
+                                <option value="F2-S18">Bay F2-S18</option>
+                                <option value="F2-S19">Bay F2-S19</option>
+                                <option value="F2-S20">Bay F2-S20</option>
+                                <option value="F2-S21">Bay F2-S21</option>
+                                <option value="F2-S22">Bay F2-S22</option>
+                                <option value="F2-S23">Bay F2-S23</option>
+                                <option value="F2-S24">Bay F2-S24</option>
+                                <option value="F2-S25">Bay F2-S25</option>
+                                <option value="F2-S26">Bay F2-S26</option>
+                                <option value="F2-S27">Bay F2-S27</option>
+                                <option value="F2-S28">Bay F2-S28</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="route-input-group">
+                        <label class="route-label">TARGET DESTINATION / BAY:</label>
+                        <select id="route-target-select" class="route-select">
+                            <option value="EXIT">EXIT GATE (CAM_02)</option>
+                            <option value="F2_EXIT">F2 Ramp Exit (Floor 2 to Slope Down)</option>
+                            <optgroup label="🏢 First Floor (F1)">
+                                <option value="F1-S01">Bay F1-S01</option>
+                                <option value="F1-S02">Bay F1-S02</option>
+                                <option value="F1-S03">Bay F1-S03</option>
+                                <option value="F1-S04">Bay F1-S04</option>
+                                <option value="F1-S05">Bay F1-S05</option>
+                                <option value="F1-S06">Bay F1-S06</option>
+                                <option value="F1-S07">Bay F1-S07</option>
+                                <option value="F1-S08">Bay F1-S08</option>
+                                <option value="F1-S09">Bay F1-S09</option>
+                                <option value="F1-S10">Bay F1-S10</option>
+                                <option value="F1-S11">Bay F1-S11</option>
+                                <option value="F1-S12" selected>Bay F1-S12</option>
+                                <option value="F1-S13">Bay F1-S13</option>
+                                <option value="F1-S14">Bay F1-S14</option>
+                                <option value="F1-S15">Bay F1-S15</option>
+                                <option value="F1-S16">Bay F1-S16</option>
+                                <option value="F1-S17">Bay F1-S17</option>
+                                <option value="F1-S18">Bay F1-S18</option>
+                                <option value="F1-S19">Bay F1-S19</option>
+                                <option value="F1-S20">Bay F1-S20</option>
+                                <option value="F1-S21">Bay F1-S21</option>
+                                <option value="F1-S22">Bay F1-S22</option>
+                                <option value="F1-S23">Bay F1-S23</option>
+                                <option value="F1-S24">Bay F1-S24</option>
+                                <option value="F1-S25">Bay F1-S25</option>
+                                <option value="F1-S26">Bay F1-S26</option>
+                                <option value="F1-S27">Bay F1-S27</option>
+                                <option value="F1-S28">Bay F1-S28</option>
+                            </optgroup>
+                            <optgroup label="🏢 Second Floor (F2)">
+                                <option value="F2-S01">Bay F2-S01</option>
+                                <option value="F2-S02">Bay F2-S02</option>
+                                <option value="F2-S03">Bay F2-S03</option>
+                                <option value="F2-S04">Bay F2-S04</option>
+                                <option value="F2-S05">Bay F2-S05</option>
+                                <option value="F2-S06">Bay F2-S06</option>
+                                <option value="F2-S07">Bay F2-S07</option>
+                                <option value="F2-S08">Bay F2-S08</option>
+                                <option value="F2-S09">Bay F2-S09</option>
+                                <option value="F2-S10">Bay F2-S10</option>
+                                <option value="F2-S11">Bay F2-S11</option>
+                                <option value="F2-S12">Bay F2-S12</option>
+                                <option value="F2-S13">Bay F2-S13</option>
+                                <option value="F2-S14">Bay F2-S14</option>
+                                <option value="F2-S15">Bay F2-S15</option>
+                                <option value="F2-S16">Bay F2-S16</option>
+                                <option value="F2-S17">Bay F2-S17</option>
+                                <option value="F2-S18">Bay F2-S18</option>
+                                <option value="F2-S19">Bay F2-S19</option>
+                                <option value="F2-S20">Bay F2-S20</option>
+                                <option value="F2-S21">Bay F2-S21</option>
+                                <option value="F2-S22">Bay F2-S22</option>
+                                <option value="F2-S23">Bay F2-S23</option>
+                                <option value="F2-S24">Bay F2-S24</option>
+                                <option value="F2-S25">Bay F2-S25</option>
+                                <option value="F2-S26">Bay F2-S26</option>
+                                <option value="F2-S27">Bay F2-S27</option>
+                                <option value="F2-S28">Bay F2-S28</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="route-action-group">
+                        <button class="btn-calculate-route" onclick="exploreCustomRoute()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                            <span>Find Shortest A* Route</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="route-output-box" class="route-output-box">
+                    <div class="route-step-sequence" id="route-step-seq">
+                        <span class="route-step-node">ENTRANCE</span>
+                        <span class="route-step-arrow">➔</span>
+                        <span class="route-step-node">TOP_ROAD_1</span>
+                        <span class="route-step-arrow">➔</span>
+                        <span class="route-step-node">TOP_ROAD_2</span>
+                        <span class="route-step-arrow">➔</span>
+                        <span class="route-step-node">A2_1</span>
+                        <span class="route-step-arrow">➔</span>
+                        <span class="route-step-node node-target">S12</span>
+                    </div>
+                    <div class="route-metrics-badge" id="route-metrics-badge">
+                        <span>Manhattan Distance: <strong>495 px</strong></span> • <span>Waypoints: <strong>5</strong></span> • <span class="text-emerald"><strong>100% Orthogonal (90°)</strong></span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Interactive Slot / Vehicle Context Popover Modal -->
+    <div id="slotActionModal" class="slot-action-modal hidden">
+        <div class="slot-modal-backdrop" onclick="closeSlotModal()"></div>
+        <div class="slot-modal-card glass-card">
+            <div class="slot-modal-header">
+                <div class="slot-modal-title-group">
+                    <span class="slot-badge-chip" id="modal-slot-id">BAY S02</span>
+                    <span class="slot-type-chip" id="modal-slot-type">STANDARD</span>
+                </div>
+                <button class="modal-close-btn" onclick="closeSlotModal()">✕</button>
+            </div>
+            
+            <div class="slot-modal-body">
+                <div class="modal-plate-container">
+                    <span class="modal-label">OCCUPYING VEHICLE</span>
+                    <div class="modal-plate-pill" id="modal-plate-val">DL01AK9876</div>
+                    <div class="modal-session-meta" id="modal-session-meta">Track #17 • Status: PARKED</div>
+                </div>
+
+                <!-- Stay Duration & Fee Summary Card -->
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600;">STAY DURATION:</span>
+                        <strong style="font-size: 12px; color: #1e293b; font-family: 'JetBrains Mono', monospace;" id="modal-duration-val">12 mins</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600;">TARIFF RATE:</span>
+                        <span style="font-size: 11px; color: #10b981; font-weight: 700;">₹20 / 30 mins</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px dashed #86efac; align-items: center;">
+                        <span style="font-size: 12px; color: #0f172a; font-weight: 800;">TOTAL CHARGE:</span>
+                        <strong style="font-size: 18px; color: #059669; font-family: 'JetBrains Mono', monospace;" id="modal-fee-val">₹20</strong>
+                    </div>
+                </div>
+                
+                <div class="modal-actions-row">
+                    <button class="btn-modal-exit" id="btn-modal-exit-action" onclick="confirmModalExit()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                        <span id="modal-exit-btn-text">Pay & Exit Vehicle</span>
+                    </button>
+                    <button class="btn-modal-cancel" onclick="closeSlotModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
