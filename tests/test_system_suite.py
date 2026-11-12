@@ -154,14 +154,20 @@ class TestIntelligentParkingSystem(unittest.TestCase):
         self.assertEqual(self.state_engine.slots[f2_entry["assigned_slot"]]["status"], "AVAILABLE")
         self.assertEqual(f2_exit["exit_route"]["origin_floor"], 2)
 
-    def test_accessibility_scoring_s02_over_s03(self):
-        """Verify F1-S02 has higher easy-access priority than F1-S03, and F1-S01 is allocated first on clean slate"""
+    def test_accessibility_scoring_f1_hierarchy(self):
+        """Verify Floor 1 6-slot layout accessibility scores follow the driving distance hierarchy"""
         s01_score = self.allocator.slots_metadata["F1-S01"]["distance_score"]
-        s02_score = self.allocator.slots_metadata["F1-S02"]["distance_score"]
         s03_score = self.allocator.slots_metadata["F1-S03"]["distance_score"]
+        s02_score = self.allocator.slots_metadata["F1-S02"]["distance_score"]
+        s04_score = self.allocator.slots_metadata["F1-S04"]["distance_score"]
+        s05_score = self.allocator.slots_metadata["F1-S05"]["distance_score"]
+        s06_score = self.allocator.slots_metadata["F1-S06"]["distance_score"]
         
-        self.assertGreater(s01_score, s02_score)
-        self.assertGreater(s02_score, s03_score)
+        self.assertGreater(s01_score, s03_score)
+        self.assertGreater(s03_score, s02_score)
+        self.assertGreater(s02_score, s04_score)
+        self.assertGreater(s04_score, s05_score)
+        self.assertGreater(s05_score, s06_score)
 
         # Allocate on clean slate: S01 gets top priority
         res = self.allocator.allocate(occupancy_map={}, vehicle_type="car")
@@ -169,11 +175,17 @@ class TestIntelligentParkingSystem(unittest.TestCase):
         assert res is not None
         self.assertEqual(res["slot_id"], "F1-S01")
 
-        # When S01 is occupied, S07 gets priority next
+        # When S01 is occupied, S03 gets priority next
         res2 = self.allocator.allocate(occupancy_map={"F1-S01": {"status": "OCCUPIED"}}, vehicle_type="car")
         self.assertIsNotNone(res2)
         assert res2 is not None
-        self.assertEqual(res2["slot_id"], "F1-S07")
+        self.assertEqual(res2["slot_id"], "F1-S03")
+
+        # When S01 and S03 are occupied, S02 gets priority
+        res3 = self.allocator.allocate(occupancy_map={"F1-S01": {"status": "OCCUPIED"}, "F1-S03": {"status": "OCCUPIED"}}, vehicle_type="car")
+        self.assertIsNotNone(res3)
+        assert res3 is not None
+        self.assertEqual(res3["slot_id"], "F1-S02")
 
     def test_floor_2_ramp_distance_impact(self):
         """Verify Floor 2 accessibility scores reflect the slope ramp travel impedance"""
@@ -198,17 +210,11 @@ class TestIntelligentParkingSystem(unittest.TestCase):
     def test_level_wise_allocation_order(self):
         """Verify sequential allocations strictly follow the requested level-wise priority order"""
         expected_f1_order = [
-            "F1-S01", "F1-S07", "F1-S12", "F1-S17",
-            "F1-S02", "F1-S08", "F1-S13", "F1-S18",
-            "F1-S03", "F1-S09", "F1-S14", "F1-S19",
-            "F1-S04", "F1-S10", "F1-S15", "F1-S20",
-            "F1-S05", "F1-S11", "F1-S16", "F1-S21",
-            "F1-S06", "F1-S22",
-            "F1-S23", "F1-S24", "F1-S25", "F1-S26", "F1-S27", "F1-S28"
+            "F1-S01", "F1-S03", "F1-S02", "F1-S04", "F1-S05", "F1-S06"
         ]
         occupancy = {}
         allocated = []
-        for _ in range(28):
+        for _ in range(6):
             res = self.allocator.allocate(occupancy_map=occupancy, vehicle_type="car")
             self.assertIsNotNone(res)
             assert res is not None
@@ -217,6 +223,12 @@ class TestIntelligentParkingSystem(unittest.TestCase):
             occupancy[slot_id] = {"status": "ALLOCATED"}
 
         self.assertEqual(allocated, expected_f1_order)
+
+        # After F1 is full, the next allocation spills over to Floor 2
+        f2_next = self.allocator.allocate(occupancy_map=occupancy, vehicle_type="car")
+        self.assertIsNotNone(f2_next)
+        assert f2_next is not None
+        self.assertTrue(str(f2_next["slot_id"]).startswith("F2-"))
 
         # Even with is_ev or truck flags, allocation follows unified level-wise order without skipping
         ev_alloc = self.allocator.allocate(occupancy_map={}, is_ev=True)

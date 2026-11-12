@@ -79,8 +79,9 @@ class ParkingStateEngine:
 
             # Populate in-memory slot map
             for s in db_slots:
+                meta = self.allocator.slots_metadata.get(s.id, {})
                 floor_val = getattr(s, "floor", 1) or (1 if "F1" in str(s.id) else (2 if "F2" in str(s.id) else 1))
-                bay_code = s.id.split("-")[-1] if "-" in str(s.id) else str(s.id)
+                bay_code = meta.get("bay_code") or (s.id.split("-")[-1] if "-" in str(s.id) else str(s.id))
                 self.slots[s.id] = {
                     "id": s.id,
                     "floor": floor_val,
@@ -93,10 +94,12 @@ class ParkingStateEngine:
                     "distance_score": getattr(s, "distance_score", 50),
                     "entry_time": s.occupied_since.strftime("%H:%M:%S") if s.occupied_since else None,
                     "entry_timestamp": s.occupied_since.timestamp() if s.occupied_since else None,
-                    "x": s.x,
-                    "y": s.y,
-                    "width": s.width,
-                    "height": s.height,
+                    "x": meta.get("x", s.x),
+                    "y": meta.get("y", s.y),
+                    "width": meta.get("width", s.width),
+                    "height": meta.get("height", s.height),
+                    "orientation": meta.get("orientation", "vertical"),
+                    "accent_color": meta.get("accent_color", "green"),
                     "is_ev": False
                 }
 
@@ -782,7 +785,7 @@ class ParkingStateEngine:
         live_total_revenue = int(self.total_revenue_inr + active_revenue)
 
         return {
-            "facility_name": "PARKIQ MULTI-LEVEL PARKING (F1 + F2 - 56 BAYS)",
+            "facility_name": "PARKIQ MULTI-LEVEL PARKING (F1: 6 BAYS + F2: 28 BAYS)",
             "kpis": {
                 "total_capacity": total,
                 "available": available,
@@ -855,8 +858,8 @@ class ParkingStateEngine:
             for s in self.sessions:
                 s["status"] = "COMPLETED"
 
-            self.log_event("RESET", "Facility state reset: All 56 bays set to General Free.")
-            return {"status": "SUCCESS", "message": "All 56 bays reset to General Free."}
+            self.log_event("RESET", "Facility state reset: All 34 bays set to General Free.")
+            return {"status": "SUCCESS", "message": "All 34 bays reset to General Free."}
         except Exception as e:
             db.rollback()
             return {"status": "ERROR", "message": str(e)}

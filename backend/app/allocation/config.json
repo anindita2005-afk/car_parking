@@ -1,19 +1,111 @@
 {
   "F1-S01": {
     "floor": 1,
-    "bay_code": "S01",
+    "bay_code": "1",
+    "slot_number": 1,
     "type": "GENERAL",
     "is_ev": false,
     "distance_score": 100,
-    "x": 190,
-    "y": 115,
-    "width": 95,
-    "height": 58,
+    "x": 82,
+    "y": 120,
+    "width": 210,
+    "height": 245,
     "zone": "A",
-    "route_distance_px": 522.0,
+    "route_distance_px": 350.0,
     "route_turns": 2,
-    "effective_distance_px": 552.0,
-    "bay_type": "GENERAL"
+    "bay_type": "GENERAL",
+    "orientation": "vertical",
+    "accent_color": "green"
+  },
+  "F1-S02": {
+    "floor": 1,
+    "bay_code": "2",
+    "slot_number": 2,
+    "type": "GENERAL",
+    "is_ev": false,
+    "distance_score": 96,
+    "x": 82,
+    "y": 395,
+    "width": 210,
+    "height": 245,
+    "zone": "A",
+    "route_distance_px": 620.0,
+    "route_turns": 2,
+    "bay_type": "GENERAL",
+    "orientation": "vertical",
+    "accent_color": "green"
+  },
+  "F1-S03": {
+    "floor": 1,
+    "bay_code": "3",
+    "slot_number": 3,
+    "type": "GENERAL",
+    "is_ev": false,
+    "distance_score": 98,
+    "x": 372,
+    "y": 120,
+    "width": 216,
+    "height": 245,
+    "zone": "B",
+    "route_distance_px": 400.0,
+    "route_turns": 2,
+    "bay_type": "GENERAL",
+    "orientation": "horizontal",
+    "accent_color": "amber"
+  },
+  "F1-S04": {
+    "floor": 1,
+    "bay_code": "4",
+    "slot_number": 4,
+    "type": "GENERAL",
+    "is_ev": false,
+    "distance_score": 94,
+    "x": 372,
+    "y": 395,
+    "width": 216,
+    "height": 245,
+    "zone": "B",
+    "route_distance_px": 670.0,
+    "route_turns": 2,
+    "bay_type": "GENERAL",
+    "orientation": "horizontal",
+    "accent_color": "green"
+  },
+  "F1-S05": {
+    "floor": 1,
+    "bay_code": "5",
+    "slot_number": 5,
+    "type": "GENERAL",
+    "is_ev": false,
+    "distance_score": 92,
+    "x": 668,
+    "y": 395,
+    "width": 210,
+    "height": 245,
+    "zone": "C",
+    "route_distance_px": 800.0,
+    "route_turns": 3,
+    "bay_type": "GENERAL",
+    "orientation": "vertical",
+    "accent_color": "amber"
+  },
+  "F1-S06": {
+    "floor": 1,
+    "bay_code": "6",
+    "slot_number": 6,
+    "type": "GENERAL",
+    "is_ev": false,
+    "distance_score": 90,
+    "x": 668,
+    "y": 120,
+    "width": 210,
+    "height": 245,
+    "zone": "C",
+    "route_distance_px": 1050.0,
+    "route_turns": 3,
+    "bay_type": "GENERAL",
+    "orientation": "vertical",
+    "accent_color": "green"
   },
   "F2-S01": {
     "floor": 2,
@@ -29,22 +121,6 @@
     "route_distance_px": 1104.0,
     "route_turns": 4,
     "effective_distance_px": 1164.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S02": {
-    "floor": 1,
-    "bay_code": "S02",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 96,
-    "x": 190,
-    "y": 185,
-    "width": 95,
-    "height": 58,
-    "zone": "A",
-    "route_distance_px": 592.0,
-    "route_turns": 2,
-    "effective_distance_px": 622.0,
     "bay_type": "GENERAL"
   },
   "F2-S02": {
@@ -63,22 +139,6 @@
     "effective_distance_px": 1234.0,
     "bay_type": "GENERAL"
   },
-  "F1-S03": {
-    "floor": 1,
-    "bay_code": "S03",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 92,
-    "x": 190,
-    "y": 255,
-    "width": 95,
-    "height": 58,
-    "zone": "A",
-    "route_distance_px": 662.0,
-    "route_turns": 2,
-    "effective_distance_px": 692.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S03": {
     "floor": 2,
     "bay_code": "S03",
@@ -93,22 +153,6 @@
     "route_distance_px": 1244.0,
     "route_turns": 4,
     "effective_distance_px": 1304.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S04": {
-    "floor": 1,
-    "bay_code": "S04",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 88,
-    "x": 190,
-    "y": 325,
-    "width": 95,
-    "height": 58,
-    "zone": "A",
-    "route_distance_px": 732.0,
-    "route_turns": 2,
-    "effective_distance_px": 762.0,
     "bay_type": "GENERAL"
   },
   "F2-S04": {
@@ -127,22 +171,6 @@
     "effective_distance_px": 1374.0,
     "bay_type": "GENERAL"
   },
-  "F1-S05": {
-    "floor": 1,
-    "bay_code": "S05",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 84,
-    "x": 190,
-    "y": 395,
-    "width": 95,
-    "height": 58,
-    "zone": "A",
-    "route_distance_px": 802.0,
-    "route_turns": 2,
-    "effective_distance_px": 832.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S05": {
     "floor": 2,
     "bay_code": "S05",
@@ -157,22 +185,6 @@
     "route_distance_px": 1384.0,
     "route_turns": 4,
     "effective_distance_px": 1444.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S06": {
-    "floor": 1,
-    "bay_code": "S06",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 80,
-    "x": 190,
-    "y": 465,
-    "width": 95,
-    "height": 58,
-    "zone": "A",
-    "route_distance_px": 872.0,
-    "route_turns": 2,
-    "effective_distance_px": 902.0,
     "bay_type": "GENERAL"
   },
   "F2-S06": {
@@ -191,22 +203,6 @@
     "effective_distance_px": 1514.0,
     "bay_type": "GENERAL"
   },
-  "F1-S07": {
-    "floor": 1,
-    "bay_code": "S07",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 99,
-    "x": 385,
-    "y": 115,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 521.0,
-    "route_turns": 2,
-    "effective_distance_px": 551.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S07": {
     "floor": 2,
     "bay_code": "S07",
@@ -221,22 +217,6 @@
     "route_distance_px": 1103.0,
     "route_turns": 4,
     "effective_distance_px": 1163.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S08": {
-    "floor": 1,
-    "bay_code": "S08",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 95,
-    "x": 385,
-    "y": 185,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 591.0,
-    "route_turns": 2,
-    "effective_distance_px": 621.0,
     "bay_type": "GENERAL"
   },
   "F2-S08": {
@@ -255,22 +235,6 @@
     "effective_distance_px": 1233.0,
     "bay_type": "GENERAL"
   },
-  "F1-S09": {
-    "floor": 1,
-    "bay_code": "S09",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 91,
-    "x": 385,
-    "y": 255,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 661.0,
-    "route_turns": 2,
-    "effective_distance_px": 691.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S09": {
     "floor": 2,
     "bay_code": "S09",
@@ -285,22 +249,6 @@
     "route_distance_px": 1243.0,
     "route_turns": 4,
     "effective_distance_px": 1303.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S10": {
-    "floor": 1,
-    "bay_code": "S10",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 87,
-    "x": 385,
-    "y": 325,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 731.0,
-    "route_turns": 2,
-    "effective_distance_px": 761.0,
     "bay_type": "GENERAL"
   },
   "F2-S10": {
@@ -319,22 +267,6 @@
     "effective_distance_px": 1373.0,
     "bay_type": "GENERAL"
   },
-  "F1-S11": {
-    "floor": 1,
-    "bay_code": "S11",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 83,
-    "x": 385,
-    "y": 395,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 801.0,
-    "route_turns": 2,
-    "effective_distance_px": 831.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S11": {
     "floor": 2,
     "bay_code": "S11",
@@ -349,22 +281,6 @@
     "route_distance_px": 1383.0,
     "route_turns": 4,
     "effective_distance_px": 1443.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S12": {
-    "floor": 1,
-    "bay_code": "S12",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 98,
-    "x": 480,
-    "y": 115,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 811.0,
-    "route_turns": 2,
-    "effective_distance_px": 841.0,
     "bay_type": "GENERAL"
   },
   "F2-S12": {
@@ -383,22 +299,6 @@
     "effective_distance_px": 1453.0,
     "bay_type": "GENERAL"
   },
-  "F1-S13": {
-    "floor": 1,
-    "bay_code": "S13",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 94,
-    "x": 480,
-    "y": 185,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 881.0,
-    "route_turns": 2,
-    "effective_distance_px": 911.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S13": {
     "floor": 2,
     "bay_code": "S13",
@@ -413,22 +313,6 @@
     "route_distance_px": 1463.0,
     "route_turns": 4,
     "effective_distance_px": 1523.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S14": {
-    "floor": 1,
-    "bay_code": "S14",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 90,
-    "x": 480,
-    "y": 255,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 951.0,
-    "route_turns": 2,
-    "effective_distance_px": 981.0,
     "bay_type": "GENERAL"
   },
   "F2-S14": {
@@ -447,22 +331,6 @@
     "effective_distance_px": 1593.0,
     "bay_type": "GENERAL"
   },
-  "F1-S15": {
-    "floor": 1,
-    "bay_code": "S15",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 86,
-    "x": 480,
-    "y": 325,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 1021.0,
-    "route_turns": 2,
-    "effective_distance_px": 1051.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S15": {
     "floor": 2,
     "bay_code": "S15",
@@ -477,22 +345,6 @@
     "route_distance_px": 1603.0,
     "route_turns": 4,
     "effective_distance_px": 1663.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S16": {
-    "floor": 1,
-    "bay_code": "S16",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 82,
-    "x": 480,
-    "y": 395,
-    "width": 95,
-    "height": 58,
-    "zone": "B",
-    "route_distance_px": 1091.0,
-    "route_turns": 2,
-    "effective_distance_px": 1121.0,
     "bay_type": "GENERAL"
   },
   "F2-S16": {
@@ -511,22 +363,6 @@
     "effective_distance_px": 1733.0,
     "bay_type": "GENERAL"
   },
-  "F1-S17": {
-    "floor": 1,
-    "bay_code": "S17",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 97,
-    "x": 675,
-    "y": 115,
-    "width": 95,
-    "height": 58,
-    "zone": "C",
-    "route_distance_px": 811.0,
-    "route_turns": 2,
-    "effective_distance_px": 841.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S17": {
     "floor": 2,
     "bay_code": "S17",
@@ -541,22 +377,6 @@
     "route_distance_px": 1393.0,
     "route_turns": 4,
     "effective_distance_px": 1453.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S18": {
-    "floor": 1,
-    "bay_code": "S18",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 93,
-    "x": 675,
-    "y": 185,
-    "width": 95,
-    "height": 58,
-    "zone": "C",
-    "route_distance_px": 881.0,
-    "route_turns": 2,
-    "effective_distance_px": 911.0,
     "bay_type": "GENERAL"
   },
   "F2-S18": {
@@ -575,22 +395,6 @@
     "effective_distance_px": 1523.0,
     "bay_type": "GENERAL"
   },
-  "F1-S19": {
-    "floor": 1,
-    "bay_code": "S19",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 89,
-    "x": 675,
-    "y": 255,
-    "width": 95,
-    "height": 58,
-    "zone": "C",
-    "route_distance_px": 951.0,
-    "route_turns": 2,
-    "effective_distance_px": 981.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S19": {
     "floor": 2,
     "bay_code": "S19",
@@ -605,22 +409,6 @@
     "route_distance_px": 1533.0,
     "route_turns": 4,
     "effective_distance_px": 1593.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S20": {
-    "floor": 1,
-    "bay_code": "S20",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 85,
-    "x": 675,
-    "y": 325,
-    "width": 95,
-    "height": 58,
-    "zone": "C",
-    "route_distance_px": 1021.0,
-    "route_turns": 2,
-    "effective_distance_px": 1051.0,
     "bay_type": "GENERAL"
   },
   "F2-S20": {
@@ -639,22 +427,6 @@
     "effective_distance_px": 1663.0,
     "bay_type": "GENERAL"
   },
-  "F1-S21": {
-    "floor": 1,
-    "bay_code": "S21",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 81,
-    "x": 675,
-    "y": 395,
-    "width": 95,
-    "height": 58,
-    "zone": "C",
-    "route_distance_px": 1091.0,
-    "route_turns": 2,
-    "effective_distance_px": 1121.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S21": {
     "floor": 2,
     "bay_code": "S21",
@@ -669,22 +441,6 @@
     "route_distance_px": 1673.0,
     "route_turns": 4,
     "effective_distance_px": 1733.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S22": {
-    "floor": 1,
-    "bay_code": "S22",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 79,
-    "x": 675,
-    "y": 465,
-    "width": 95,
-    "height": 58,
-    "zone": "C",
-    "route_distance_px": 1161.0,
-    "route_turns": 2,
-    "effective_distance_px": 1191.0,
     "bay_type": "GENERAL"
   },
   "F2-S22": {
@@ -703,22 +459,6 @@
     "effective_distance_px": 1803.0,
     "bay_type": "GENERAL"
   },
-  "F1-S23": {
-    "floor": 1,
-    "bay_code": "S23",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 78,
-    "x": 295,
-    "y": 600,
-    "width": 56,
-    "height": 95,
-    "zone": "D",
-    "route_distance_px": 937.0,
-    "route_turns": 3,
-    "effective_distance_px": 982.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S23": {
     "floor": 2,
     "bay_code": "S23",
@@ -733,22 +473,6 @@
     "route_distance_px": 1517.0,
     "route_turns": 5,
     "effective_distance_px": 1592.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S24": {
-    "floor": 1,
-    "bay_code": "S24",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 77,
-    "x": 360,
-    "y": 600,
-    "width": 56,
-    "height": 95,
-    "zone": "D",
-    "route_distance_px": 1002.0,
-    "route_turns": 5,
-    "effective_distance_px": 1077.0,
     "bay_type": "GENERAL"
   },
   "F2-S24": {
@@ -767,22 +491,6 @@
     "effective_distance_px": 1687.0,
     "bay_type": "GENERAL"
   },
-  "F1-S25": {
-    "floor": 1,
-    "bay_code": "S25",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 76,
-    "x": 425,
-    "y": 600,
-    "width": 56,
-    "height": 95,
-    "zone": "D",
-    "route_distance_px": 1067.0,
-    "route_turns": 5,
-    "effective_distance_px": 1142.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S25": {
     "floor": 2,
     "bay_code": "S25",
@@ -797,22 +505,6 @@
     "route_distance_px": 1647.0,
     "route_turns": 7,
     "effective_distance_px": 1752.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S26": {
-    "floor": 1,
-    "bay_code": "S26",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 75,
-    "x": 490,
-    "y": 600,
-    "width": 56,
-    "height": 95,
-    "zone": "D",
-    "route_distance_px": 1132.0,
-    "route_turns": 5,
-    "effective_distance_px": 1207.0,
     "bay_type": "GENERAL"
   },
   "F2-S26": {
@@ -831,22 +523,6 @@
     "effective_distance_px": 1817.0,
     "bay_type": "GENERAL"
   },
-  "F1-S27": {
-    "floor": 1,
-    "bay_code": "S27",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 74,
-    "x": 555,
-    "y": 600,
-    "width": 56,
-    "height": 95,
-    "zone": "D",
-    "route_distance_px": 1197.0,
-    "route_turns": 5,
-    "effective_distance_px": 1272.0,
-    "bay_type": "GENERAL"
-  },
   "F2-S27": {
     "floor": 2,
     "bay_code": "S27",
@@ -861,22 +537,6 @@
     "route_distance_px": 1777.0,
     "route_turns": 7,
     "effective_distance_px": 1882.0,
-    "bay_type": "GENERAL"
-  },
-  "F1-S28": {
-    "floor": 1,
-    "bay_code": "S28",
-    "type": "GENERAL",
-    "is_ev": false,
-    "distance_score": 73,
-    "x": 620,
-    "y": 600,
-    "width": 56,
-    "height": 95,
-    "zone": "D",
-    "route_distance_px": 1238.0,
-    "route_turns": 3,
-    "effective_distance_px": 1283.0,
     "bay_type": "GENERAL"
   },
   "F2-S28": {

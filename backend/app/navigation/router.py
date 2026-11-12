@@ -16,16 +16,19 @@ class ParkingRouter:
         self.edges.setdefault(u, []).append(v)
         self.edges.setdefault(v, []).append(u)
 
+    def _add_directed_edge(self, u, v):
+        self.edges.setdefault(u, []).append(v)
+
     def _build_multi_floor_graph(self):
         # =====================================================================
-        # FLOOR 1 (F1) - Ground Level
+        # FLOOR 1 (F1) - Ground Level (6 Spacious Slots Layout)
         # =====================================================================
-        self.nodes['ENTRANCE'] = (0, 55)
-        self.nodes['SLOPE_UP_START'] = (65, 55)
-        self.nodes['F1_TOP_1'] = (335, 55)
-        self.nodes['F1_TOP_2'] = (625, 55)
-        self.nodes['SLOPE_DOWN_END'] = (895, 55)
-        self.nodes['EXIT'] = (940, 55)
+        self.nodes['ENTRANCE'] = (0, 60)
+        self.nodes['SLOPE_UP_START'] = (38, 60)
+        self.nodes['F1_TOP_1'] = (332, 60)
+        self.nodes['F1_TOP_2'] = (628, 60)
+        self.nodes['SLOPE_DOWN_END'] = (922, 60)
+        self.nodes['EXIT'] = (960, 60)
 
         self._add_edge('ENTRANCE', 'SLOPE_UP_START')
         self._add_edge('SLOPE_UP_START', 'F1_TOP_1')
@@ -33,47 +36,59 @@ class ParkingRouter:
         self._add_edge('F1_TOP_2', 'SLOPE_DOWN_END')
         self._add_edge('SLOPE_DOWN_END', 'EXIT')
 
-        # F1 Aisles (Southbound)
-        f1_a1 = ['F1_TOP_1'] + [f'F1_A1_{i}' for i in range(1, 7)] + ['F1_BTM_1']
+        # F1 Aisle 1 (Southbound): x = 332
+        self.nodes['F1_A1_ROW1'] = (332, 242)
+        self.nodes['F1_A1_ROW2'] = (332, 517)
+        self.nodes['F1_BTM_1'] = (332, 680)
+
+        self._add_edge('F1_TOP_1', 'F1_A1_ROW1')
+        self._add_edge('F1_A1_ROW1', 'F1_A1_ROW2')
+        self._add_edge('F1_A1_ROW2', 'F1_BTM_1')
+
+        # F1 Bottom Connector Road (Aisle 1 to Aisle 2, Eastbound)
+        self._add_directed_edge('F1_BTM_1', 'F1_BTM_2')
+
+        # F1 Aisle 2 (Strictly Northbound toward exit): x = 628
+        self.nodes['F1_BTM_2'] = (628, 680)
+        self.nodes['F1_A2_ROW2'] = (628, 517)
+        self.nodes['F1_A2_ROW1'] = (628, 242)
+
+        self._add_directed_edge('F1_BTM_2', 'F1_A2_ROW2')
+        self._add_directed_edge('F1_A2_ROW2', 'F1_A2_ROW1')
+        self._add_directed_edge('F1_A2_ROW1', 'F1_TOP_2')
+
+        # F1 Slots 1 to 6 Centers and Connections
+        # Slot 1: Row 1 West (Car vertical at x=232, y=242)
+        self.nodes['F1-S01'] = (232, 242)
+        self._add_edge('F1-S01', 'F1_A1_ROW1')
+
+        # Slot 2: Row 2 West (Car vertical at x=232, y=517)
+        self.nodes['F1-S02'] = (232, 517)
+        self._add_edge('F1-S02', 'F1_A1_ROW2')
+
+        # Slot 3: Row 1 Center (Car horizontal at x=517, y=242) - Accessible from Aisle 1
+        self.nodes['F1-S03'] = (517, 242)
+        self._add_edge('F1-S03', 'F1_A1_ROW1')
+
+        # Slot 4: Row 2 Center (Car horizontal at x=517, y=517) - Accessible from Aisle 1
+        self.nodes['F1-S04'] = (517, 517)
+        self._add_edge('F1-S04', 'F1_A1_ROW2')
+
+        # Slot 5: Row 2 East (Car vertical at x=818, y=517)
+        self.nodes['F1-S05'] = (818, 517)
+        self._add_edge('F1-S05', 'F1_A2_ROW2')
+
+        # Slot 6: Row 1 East (Car vertical at x=818, y=242)
+        self.nodes['F1-S06'] = (818, 242)
+        self._add_edge('F1-S06', 'F1_A2_ROW1')
+
+        # Backward compatibility aliases for S1..S6 and 1..6
         for i in range(1, 7):
-            self.nodes[f'F1_A1_{i}'] = (335, 144 + (i-1)*70)
-            self.nodes[f'F1_A2_{i}'] = (625, 144 + (i-1)*70)
-        self.nodes['F1_BTM_1'] = (335, 555)
-        self.nodes['F1_BTM_2'] = (625, 555)
-
-        for i in range(len(f1_a1)-1):
-            self._add_edge(f1_a1[i], f1_a1[i+1])
-
-        f1_a2 = ['F1_TOP_2'] + [f'F1_A2_{i}' for i in range(1, 7)] + ['F1_BTM_2']
-        for i in range(len(f1_a2)-1):
-            self._add_edge(f1_a2[i], f1_a2[i+1])
-
-        # F1 Bottom Crossroad
-        f1_btm = ['F1_BTM_1'] + [f'F1_BTM_S{i}' for i in range(23, 29)] + ['F1_BTM_2']
-        for i, x in enumerate([323, 388, 453, 518, 583, 648], 23):
-            self.nodes[f'F1_BTM_S{i}'] = (x, 555)
-            self.nodes[f'F1-S{i}'] = (x, 645)
-            self._add_edge(f'F1_BTM_S{i}', f'F1-S{i}')
-
-        for i in range(len(f1_btm)-1):
-            self._add_edge(f1_btm[i], f1_btm[i+1])
-
-        # F1 Central Bays
-        for i in range(1, 7):
-            self.nodes[f'F1-S{i:02d}'] = (237, 144 + (i-1)*70)
-            self._add_edge(f'F1-S{i:02d}', f'F1_A1_{i}')
-
-        for i in range(7, 12):
-            self.nodes[f'F1-S{i:02d}'] = (432, 144 + (i-7)*70)
-            self._add_edge(f'F1-S{i:02d}', f'F1_A1_{i-6}')
-
-        for i in range(12, 17):
-            self.nodes[f'F1-S{i:02d}'] = (528, 144 + (i-12)*70)
-            self._add_edge(f'F1-S{i:02d}', f'F1_A2_{i-11}')
-
-        for i in range(17, 23):
-            self.nodes[f'F1-S{i:02d}'] = (722, 144 + (i-17)*70)
-            self._add_edge(f'F1-S{i:02d}', f'F1_A2_{i-16}')
+            f1_sid = f'F1-S0{i}'
+            for alias in [f'S0{i}', f'S{i}', str(i)]:
+                self.nodes[alias] = self.nodes[f1_sid]
+                for nbr in self.edges.get(f1_sid, []):
+                    self._add_edge(alias, nbr)
 
         # =====================================================================
         # INTER-FLOOR CONNECTING RAMPS / SLOPES
@@ -141,14 +156,14 @@ class ParkingRouter:
             self.nodes[f'F2-S{i:02d}'] = (722, 574 - (i-17)*70)
             self._add_edge(f'F2-S{i:02d}', f'F2_A2_{i-16}')
 
-        # Backward compatibility aliases for S01-S28 -> F1-S01..F1-S28
-        for i in range(1, 29):
-            sid = f'S{i:02d}'
+        # Backward compatibility aliases for S01-S06 and 1-6 -> F1-S01..F1-S06
+        for i in range(1, 7):
             f1_sid = f'F1-S{i:02d}'
-            self.nodes[sid] = self.nodes[f1_sid]
-            # Mirror edges for alias
-            for nbr in self.edges.get(f1_sid, []):
-                self._add_edge(sid, nbr)
+            if f1_sid in self.nodes:
+                for alias in [f'S{i:02d}', f'S{i}', str(i)]:
+                    self.nodes[alias] = self.nodes[f1_sid]
+                    for nbr in self.edges.get(f1_sid, []):
+                        self._add_edge(alias, nbr)
 
     def _euclidean_dist(self, node_a, node_b):
         x1, y1 = self.nodes[node_a]

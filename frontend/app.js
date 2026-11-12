@@ -135,12 +135,14 @@ function updateDashboardUI(state) {
         const badgeF1 = document.getElementById("badge-floor-f1");
         const badgeF2 = document.getElementById("badge-floor-f2");
         if (badgeF1) {
-            const f1Avail = kpis.f1_available != null ? kpis.f1_available : 28;
-            badgeF1.innerText = `${f1Avail} Free / 28`;
+            const f1Avail = kpis.f1_available != null ? kpis.f1_available : 6;
+            const f1Cap = kpis.f1_capacity || 6;
+            badgeF1.innerText = `${f1Avail} Free / ${f1Cap}`;
         }
         if (badgeF2) {
             const f2Avail = kpis.f2_available != null ? kpis.f2_available : 28;
-            badgeF2.innerText = `${f2Avail} Free / 28`;
+            const f2Cap = kpis.f2_capacity || 28;
+            badgeF2.innerText = `${f2Avail} Free / ${f2Cap}`;
         }
     }
 
@@ -373,16 +375,88 @@ function drawHazardStripes(ctx, x, y, width, height, stripeWidth = 5) {
 
 function drawSlopeRamps(ctx, floor) {
     const isF1 = (floor === "F1");
-    const yStart = isF1 ? 90 : 25;
+
+    if (isF1) {
+        // =====================================================================
+        // FLOOR 1 SLOPE BARS (Exact Architectural Match to Floor 1 Blueprint)
+        // =====================================================================
+        const yStart = 85;
+        const yEnd = 705;
+        const rampHeight = yEnd - yStart;
+        const barWidth = 50;
+
+        // 1. LEFT SLOPE BAR (West Edge, Downward Traffic to F2)
+        const leftX = 10;
+        ctx.fillStyle = "#591319";
+        ctx.fillRect(leftX, yStart, barWidth, rampHeight);
+        ctx.strokeStyle = "#781d22";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(leftX, yStart, barWidth, rampHeight);
+
+        // White downward arrows (↓)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.font = "bold 16px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const downArrowYs = [135, 195, 495, 565, 635];
+        downArrowYs.forEach(ay => {
+            ctx.fillText("↓", leftX + barWidth / 2, ay);
+        });
+
+        // Inward Arrow (➔) toward entry
+        ctx.fillText("➔", leftX + barWidth / 2, 255);
+
+        // Bold Rotated "SLOPE" text (reading downwards top-to-bottom)
+        ctx.save();
+        ctx.translate(leftX + barWidth / 2, 370);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("SLOPE", 0, 0);
+        ctx.restore();
+
+        // 2. RIGHT SLOPE BAR (East Edge, Upward Traffic from F2)
+        const rightX = 900;
+        ctx.fillStyle = "#591319";
+        ctx.fillRect(rightX, yStart, barWidth, rampHeight);
+        ctx.strokeStyle = "#781d22";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(rightX, yStart, barWidth, rampHeight);
+
+        // White upward arrows (↑)
+        const upArrowYs = [135, 195, 255, 565, 635];
+        upArrowYs.forEach(ay => {
+            ctx.fillText("↑", rightX + barWidth / 2, ay);
+        });
+
+        // Inward Arrow (⬅) from aisle
+        ctx.fillText("⬅", rightX + barWidth / 2, 495);
+
+        // Bold Rotated "SLOPE" text (reading upwards bottom-to-top)
+        ctx.save();
+        ctx.translate(rightX + barWidth / 2, 370);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("SLOPE", 0, 0);
+        ctx.restore();
+
+        return;
+    }
+
+    // =========================================================================
+    // FLOOR 2 SLOPE RAMPS (Connecting to Floor 2 Bottom Highway)
+    // =========================================================================
+    const yStart = 25;
     const yEnd = 605;
     const rampHeight = yEnd - yStart;
 
-    // -------------------------------------------------------------------------
-    // 1. LEFT RAMP: SLOPE UP (F1 -> F2)
-    // -------------------------------------------------------------------------
     // Left hazard stripe border
     drawHazardStripes(ctx, 25, yStart, 8, rampHeight, 5);
-    // Right hazard stripe border
     drawHazardStripes(ctx, 97, yStart, 8, rampHeight, 5);
 
     // Maroon / Crimson tarmac roadway
@@ -414,19 +488,11 @@ function drawSlopeRamps(ctx, floor) {
     ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
     ctx.shadowBlur = 4;
     ctx.textAlign = "center";
-    if (isF1) {
-        ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
-        ctx.fillText("SLOPE", 65, 335);
-        ctx.fillText("UP", 65, 353);
-        ctx.font = "bold 10px 'JetBrains Mono', monospace";
-        ctx.fillText("(F1 → F2)", 65, 372);
-    } else {
-        ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
-        ctx.fillText("SLOPE UP", 65, 335);
-        ctx.font = "bold 9px 'JetBrains Mono', monospace";
-        ctx.fillText("(First Floor →", 65, 353);
-        ctx.fillText("Second Floor)", 65, 369);
-    }
+    ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("SLOPE UP", 65, 335);
+    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+    ctx.fillText("(First Floor →", 65, 353);
+    ctx.fillText("Second Floor)", 65, 369);
     ctx.restore();
 
     // Bottom Terminal Box: SECOND FLOOR ENTRY ➔
@@ -450,24 +516,19 @@ function drawSlopeRamps(ctx, floor) {
     // -------------------------------------------------------------------------
     // 2. RIGHT RAMP: SLOPE DOWN (F2 -> F1)
     // -------------------------------------------------------------------------
-    // Left hazard stripe border
     drawHazardStripes(ctx, 855, yStart, 8, rampHeight, 5);
-    // Right hazard stripe border
     drawHazardStripes(ctx, 927, yStart, 8, rampHeight, 5);
 
-    // Maroon / Crimson tarmac roadway
     const rightGrad = ctx.createLinearGradient(863, yStart, 927, yEnd);
     rightGrad.addColorStop(0, "#450a0a");
     rightGrad.addColorStop(1, "#581c1c");
     ctx.fillStyle = rightGrad;
     ctx.fillRect(863, yStart, 64, rampHeight);
 
-    // Outer border line
     ctx.strokeStyle = "#78350f";
     ctx.lineWidth = 1.5;
     ctx.strokeRect(855, yStart, 80, rampHeight);
 
-    // Directional Upward Arrows (indicating flow toward Exit Gate)
     ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
     ctx.font = "bold 15px sans-serif";
     ctx.textAlign = "center";
@@ -477,25 +538,16 @@ function drawSlopeRamps(ctx, floor) {
         }
     });
 
-    // Center Vertical Ramp Label
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
     ctx.shadowBlur = 4;
     ctx.textAlign = "center";
-    if (isF1) {
-        ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
-        ctx.fillText("SLOPE", 895, 335);
-        ctx.fillText("DOWN", 895, 353);
-        ctx.font = "bold 10px 'JetBrains Mono', monospace";
-        ctx.fillText("(F2 → F1)", 895, 372);
-    } else {
-        ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
-        ctx.fillText("SLOPE DOWN", 895, 335);
-        ctx.font = "bold 9px 'JetBrains Mono', monospace";
-        ctx.fillText("(Second Floor →", 895, 353);
-        ctx.fillText("First Floor)", 895, 369);
-    }
+    ctx.font = "bold 12px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText("SLOPE DOWN", 895, 335);
+    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+    ctx.fillText("(Second Floor →", 895, 353);
+    ctx.fillText("First Floor)", 895, 369);
     ctx.restore();
 
     // Bottom Terminal Box: SECOND FLOOR EXIT ➔
@@ -524,18 +576,18 @@ function isPointOnFloor(pt, floor) {
     if (!pt) return false;
     const x = pt.x;
     const y = pt.y;
-    const isRamp = (x <= 115 || x >= 845);
+    const isRamp = (x <= 75 || x >= 885);
     if (floor === "F1") {
         if (isRamp) {
             return y <= 380; // Upper section of connecting slopes belongs to F1
         }
-        return y <= 585; // F1 bays & aisles are y <= 585 (never storage room y > 600)
+        return true; // All interior waypoints including bottom connector road belong to F1
     } else {
         // Floor 2
         if (isRamp) {
             return y >= 320; // Lower section of connecting slopes belongs to F2
         }
-        return y >= 125; // F2 bays & aisles are y >= 125 (never top storage room y < 120)
+        return y >= 125; // F2 bays & aisles are y >= 125
     }
 }
 
@@ -628,29 +680,30 @@ function renderDigitalTwin() {
 
     if (currentFloor === "F1") {
         // =====================================================================
-        // FIRST FLOOR (F1) ARCHITECTURAL LAYOUT
+        // FIRST FLOOR (F1) ARCHITECTURAL LAYOUT (6 SPACIOUS SLOTS LAYOUT)
         // =====================================================================
 
-        // Top Entry / Exit Highway (Extended from x = 0 to 960)
-        ctx.fillRect(0, 20, 960, 70);
+        // Top Entry / Exit Highway: x = 0 to 960, y = 15 to 85 (height = 70)
+        ctx.fillRect(0, 15, 960, 70);
 
-        // Aisle 1 (North-South, West): x = 285 to 385
-        ctx.fillRect(285, 90, 100, 475);
+        // Aisle 1 (Southbound): x = 292 to 372 (width = 80, center = 332)
+        ctx.fillRect(292, 85, 80, 555);
 
-        // Aisle 2 (North-South, East): x = 575 to 675
-        ctx.fillRect(575, 90, 100, 475);
+        // Aisle 2 (Northbound toward Exit): x = 588 to 668 (width = 80, center = 628)
+        ctx.fillRect(588, 85, 80, 555);
 
-        // Bottom Cross-Aisle: x = 285 to 675, y = 525 to 585
-        ctx.fillRect(285, 525, 390, 60);
+        // Bottom Connector Road: x = 292 to 668, y = 640 to 705 (height = 65)
+        ctx.fillRect(292, 640, 376, 65);
 
         // Roadway Curbs & Perimeter Markings
         ctx.strokeStyle = "#cbd5e1";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(0, 20);
-        ctx.lineTo(960, 20);
-        ctx.moveTo(0, 90);
-        ctx.lineTo(960, 90);
+        // Top highway curbs
+        ctx.moveTo(0, 15);
+        ctx.lineTo(960, 15);
+        ctx.moveTo(0, 85);
+        ctx.lineTo(960, 85);
         ctx.stroke();
 
         // Dashed White Lane Centerlines
@@ -660,100 +713,76 @@ function renderDigitalTwin() {
 
         // Top Highway Centerline
         ctx.beginPath();
-        ctx.moveTo(0, 55);
-        ctx.lineTo(960, 55);
+        ctx.moveTo(0, 50);
+        ctx.lineTo(960, 50);
         ctx.stroke();
 
-        // Aisle 1 Centerline
+        // Aisle 1 Centerline (Southbound)
         ctx.beginPath();
-        ctx.moveTo(335, 90);
-        ctx.lineTo(335, 555);
+        ctx.moveTo(332, 85);
+        ctx.lineTo(332, 640);
         ctx.stroke();
 
-        // Aisle 2 Centerline
+        // Aisle 2 Centerline (Northbound)
         ctx.beginPath();
-        ctx.moveTo(625, 90);
-        ctx.lineTo(625, 555);
+        ctx.moveTo(628, 85);
+        ctx.lineTo(628, 640);
         ctx.stroke();
 
-        // Bottom Cross-Aisle Centerline
+        // Bottom Connector Road Centerline (Eastbound)
         ctx.beginPath();
-        ctx.moveTo(335, 555);
-        ctx.lineTo(625, 555);
+        ctx.moveTo(332, 672);
+        ctx.lineTo(628, 672);
         ctx.stroke();
         ctx.setLineDash([]);
 
         // Directional Driving Arrows
         ctx.fillStyle = "rgba(100, 116, 139, 0.75)";
-        ctx.font = "bold 14px sans-serif";
+        ctx.font = "bold 15px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("➔", 160, 59);
-        ctx.fillText("➔", 335, 59);
-        ctx.fillText("➔", 480, 59);
-        ctx.fillText("➔", 625, 59);
-        ctx.fillText("➔", 800, 59);
-        ctx.fillText("⬇", 335, 230);
-        ctx.fillText("⬇", 335, 410);
-        ctx.fillText("⬇", 625, 230);
-        ctx.fillText("⬇", 625, 410);
-        ctx.fillText("➔", 480, 559);
+        ctx.textBaseline = "middle";
+
+        // Top Highway Eastbound Arrows
+        ctx.fillText("➔", 160, 50);
+        ctx.fillText("➔", 332, 50);
+        ctx.fillText("➔", 480, 50);
+        ctx.fillText("➔", 628, 50);
+        ctx.fillText("➔", 800, 50);
+
+        // Aisle 1 Southbound Arrows (↓)
+        ctx.fillText("⬇", 332, 220);
+        ctx.fillText("⬇", 332, 410);
+
+        // Aisle 2 Northbound Arrows (↑)
+        ctx.fillText("⬆", 628, 410);
+        ctx.fillText("⬆", 628, 220);
+
+        // Bottom Connector Road Eastbound Arrow (➔)
+        ctx.fillText("➔", 480, 672);
 
         // Gate Badges
         ctx.fillStyle = "#0284c7";
         ctx.font = "bold 11px 'JetBrains Mono', monospace";
         ctx.textAlign = "left";
-        ctx.fillText("▶ ENTRY GATE [CAM_01]", 15, 16);
+        ctx.textBaseline = "alphabetic";
+        ctx.fillText("▶ ENTRY GATE [CAM_01]", 15, 12);
 
         ctx.fillStyle = "#10b981";
         ctx.textAlign = "right";
-        ctx.fillText("EXIT GATE [CAM_02] ◀", 945, 16);
+        ctx.fillText("EXIT GATE [CAM_02] ◀", 945, 12);
 
         // Blueprint Header Banner for F1
         ctx.save();
         ctx.fillStyle = "#1e3a8a";
         ctx.beginPath();
-        ctx.roundRect(355, 1, 250, 18, 5);
+        ctx.roundRect(355, 1, 250, 16, 4);
         ctx.fill();
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("First floor  —  PARKING LAYOUT", 480, 10);
+        ctx.fillText("First floor  —  PARKING LAYOUT", 480, 9);
         ctx.restore();
-
-        // Storage / Utility Room at Bottom Left
-        ctx.fillStyle = "#f1f5f9";
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(155, 605, 115, 95, 4);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#64748b";
-        ctx.font = "bold 9.5px 'JetBrains Mono', monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("STORAGE /", 212, 646);
-        ctx.fillText("UTILITY", 212, 659);
-        ctx.font = "8.5px 'JetBrains Mono', monospace";
-        ctx.fillText("A: 31.2 m²", 212, 674);
-
-        // Columns / Pillars for F1
-        const pillarsF1 = [
-            [185, 115], [185, 255], [185, 395], [185, 525],
-            [285, 115], [285, 255], [285, 395], [285, 525],
-            [385, 115], [385, 255], [385, 395], [385, 525],
-            [480, 115], [480, 255], [480, 395], [480, 525],
-            [575, 115], [575, 255], [575, 395], [575, 525],
-            [675, 115], [675, 255], [675, 395], [675, 525],
-            [770, 115], [770, 255], [770, 395], [770, 525]
-        ];
-        pillarsF1.forEach(([px, py]) => {
-            ctx.fillStyle = "#1e293b";
-            ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
-            ctx.shadowBlur = 3;
-            ctx.fillRect(px - 5, py - 5, 10, 10);
-            ctx.shadowBlur = 0;
-        });
 
     } else {
         // =====================================================================
@@ -898,82 +927,202 @@ function renderDigitalTwin() {
             const isAllocated = slot.status === "ALLOCATED";
             const isHovered = hoveredSlotId === slot.id;
 
-            // Slot Background Fill (General Unified Scheme: Emerald = Free, Rose = Occupied, Sky = Incoming)
-            if (isOccupied) {
-                ctx.fillStyle = isHovered ? "rgba(254, 205, 211, 0.95)" : "rgba(254, 226, 226, 0.85)";
-                ctx.strokeStyle = isHovered ? "#e11d48" : "#f87171";
-            } else if (isAllocated) {
-                ctx.fillStyle = "rgba(224, 242, 254, 0.9)";
-                ctx.strokeStyle = "#0284c7";
-            } else {
-                ctx.fillStyle = isHovered ? "rgba(209, 250, 229, 0.95)" : "rgba(236, 253, 245, 0.8)";
-                ctx.strokeStyle = "#34d399";
-            }
+            if (slotFloorNum === 1) {
+                // =============================================================
+                // FLOOR 1: 6 SPACIOUS CARDS (Matching Floor 1 Blueprint Design)
+                // =============================================================
+                const slotNum = slot.bay_code || slot.id.replace("F1-S0", "").replace("F1-S", "");
+                const isAmber = (slot.id === "F1-S03" || slot.id === "F1-S05");
+                const isHorizontal = (slot.id === "F1-S03" || slot.id === "F1-S04");
 
-            ctx.lineWidth = isHovered || isAllocated ? 3 : 1.5;
-            if (isAllocated) {
-                ctx.setLineDash([5, 4]);
-            }
-            ctx.beginPath();
-            ctx.roundRect(x, y, w, h, 6);
-            ctx.fill();
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Slot Bay ID
-            ctx.fillStyle = "#1e293b";
-            ctx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
-            ctx.textAlign = "left";
-            ctx.fillText(bayCode, x + 6, y + 15);
-
-            // Draw REALISTIC CAR if Occupied
-            if (isOccupied) {
-                const carColor = colorsPool[index % colorsPool.length];
-                const carX = x + w / 2;
-                const carY = y + h / 2;
-                const plate = slot.vehicle_plate || `TRK-${slot.track_id || (10 + index)}`;
-
-                if (isVertical) {
-                    drawRealisticCar(ctx, carX, carY, 44, 76, carColor, plate, false, 0);
+                // Card Background & Border
+                let bgFill, borderColor;
+                if (isAmber) {
+                    bgFill = isHovered ? "rgba(254, 237, 213, 0.98)" : "rgba(254, 243, 226, 0.95)";
+                    borderColor = isHovered ? "#d97706" : "#f59e0b";
                 } else {
-                    const isWestFacing = (bayCode >= "S01" && bayCode <= "S06") || (bayCode >= "S12" && bayCode <= "S16");
-                    const rot = isWestFacing ? Math.PI / 2 : -Math.PI / 2;
-                    drawRealisticCar(ctx, carX, carY, 44, 76, carColor, plate, false, rot);
+                    bgFill = isHovered ? "rgba(209, 250, 229, 0.98)" : "rgba(220, 246, 233, 0.95)";
+                    borderColor = isHovered ? "#059669" : "#34d399";
                 }
 
-                // If hovered, show interactive "CLICK TO EXIT" pill
-                if (isHovered) {
-                    ctx.save();
-                    ctx.fillStyle = "#e11d48";
-                    ctx.shadowColor = "rgba(225, 29, 72, 0.4)";
-                    ctx.shadowBlur = 8;
-                    ctx.beginPath();
-                    ctx.roundRect(x + 2, y + h - 20, w - 4, 16, 4);
+                if (isAllocated) {
+                    borderColor = "#0284c7";
+                }
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, 14);
+                ctx.fillStyle = bgFill;
+                ctx.fill();
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = isHovered || isAllocated ? 3 : 2;
+                if (isAllocated) {
+                    ctx.setLineDash([7, 5]);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+
+                // Large Bold Slot Number (e.g. 1, 2, 3, 4, 5, 6)
+                ctx.save();
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 44px 'Plus Jakarta Sans', sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(slotNum, x + 48, y + 100);
+
+                // Status Pill Badge (Directly below the number)
+                const pillW = 74;
+                const pillH = 22;
+                const pillX = (x + 48) - pillW / 2;
+                const pillY = (y + 140) - pillH / 2;
+
+                ctx.beginPath();
+                ctx.roundRect(pillX, pillY, pillW, pillH, 11);
+
+                if (isOccupied) {
+                    ctx.fillStyle = "#831818"; // Rich dark maroon
                     ctx.fill();
-                    ctx.shadowBlur = 0;
-
                     ctx.fillStyle = "#ffffff";
-                    ctx.font = "bold 8px 'JetBrains Mono', monospace";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillText("➔ EXIT", x + w/2, y + h - 12);
-                    ctx.restore();
+                    ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
+                    ctx.fillText("OCCUPIED", x + 48, y + 140);
+                } else if (isAllocated) {
+                    ctx.fillStyle = "#0284c7"; // Sky Blue
+                    ctx.fill();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "bold 9.5px 'Plus Jakarta Sans', sans-serif";
+                    ctx.fillText("INCOMING", x + 48, y + 140);
+                    // Plate text below pill
+                    ctx.fillStyle = "#0369a1";
+                    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+                    ctx.fillText(slot.vehicle_plate || "ASSIGNED", x + 48, y + 158);
+                } else {
+                    ctx.fillStyle = "#059669"; // Emerald Green
+                    ctx.fill();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
+                    ctx.fillText("FREE", x + 48, y + 140);
                 }
-            } else if (isAllocated) {
-                // Incoming Vehicle Reservation Badge (clean centered, no overlap)
-                ctx.fillStyle = "#0284c7";
-                ctx.font = "bold 9px 'JetBrains Mono', monospace";
-                ctx.textAlign = "center";
-                ctx.fillText("INCOMING", x + w / 2, y + h / 2 - 4);
-                ctx.fillStyle = "#0369a1";
-                ctx.font = "bold 8px 'JetBrains Mono', monospace";
-                ctx.fillText(slot.vehicle_plate || "ASSIGNED", x + w / 2, y + h / 2 + 9);
+                ctx.restore();
+
+                // Draw Realistic Parked Car
+                if (isOccupied) {
+                    const defaultPalette = {
+                        "F1-S01": "#38bdf8",
+                        "F1-S02": "#d97706",
+                        "F1-S03": "#ea580c",
+                        "F1-S04": "#94a3b8",
+                        "F1-S05": "#334155",
+                        "F1-S06": "#8b5cf6"
+                    };
+                    const carColor = defaultPalette[slot.id] || colorsPool[index % colorsPool.length];
+                    const plate = slot.vehicle_plate || `S0${slotNum}`;
+
+                    if (isHorizontal) {
+                        const carX = x + 142;
+                        const carY = y + 122;
+                        drawRealisticCar(ctx, carX, carY, 48, 94, carColor, plate, slot.is_ev, Math.PI / 2);
+                    } else {
+                        const carX = x + 146;
+                        const carY = y + 122;
+                        drawRealisticCar(ctx, carX, carY, 48, 94, carColor, plate, slot.is_ev, 0);
+                    }
+
+                    // Hover action pill
+                    if (isHovered) {
+                        ctx.save();
+                        ctx.fillStyle = "#e11d48";
+                        ctx.shadowColor = "rgba(225, 29, 72, 0.4)";
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.roundRect(x + w / 2 - 45, y + h - 28, 90, 20, 6);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText("➔ CLICK TO EXIT", x + w / 2, y + h - 18);
+                        ctx.restore();
+                    }
+                }
             } else {
-                // Empty slot markings (clean centered FREE status)
-                ctx.fillStyle = "rgba(16, 185, 129, 0.9)";
-                ctx.font = "bold 9px 'JetBrains Mono', monospace";
-                ctx.textAlign = "center";
-                ctx.fillText("FREE", x + w / 2, y + h / 2 + (isVertical ? 10 : 4));
+                // =============================================================
+                // FLOOR 2: 28 BAYS ARCHITECTURAL LAYOUT (Preserved as Before)
+                // =============================================================
+                const bayCode = slot.bay_code || slot.id.split("-").pop();
+                const isVertical = bayCode >= "S23";
+
+                if (isOccupied) {
+                    ctx.fillStyle = isHovered ? "rgba(254, 205, 211, 0.95)" : "rgba(254, 226, 226, 0.85)";
+                    ctx.strokeStyle = isHovered ? "#e11d48" : "#f87171";
+                } else if (isAllocated) {
+                    ctx.fillStyle = "rgba(224, 242, 254, 0.9)";
+                    ctx.strokeStyle = "#0284c7";
+                } else {
+                    ctx.fillStyle = isHovered ? "rgba(209, 250, 229, 0.95)" : "rgba(236, 253, 245, 0.8)";
+                    ctx.strokeStyle = "#34d399";
+                }
+
+                ctx.lineWidth = isHovered || isAllocated ? 3 : 1.5;
+                if (isAllocated) ctx.setLineDash([5, 4]);
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, 6);
+                ctx.fill();
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Slot Bay ID
+                ctx.fillStyle = "#1e293b";
+                ctx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
+                ctx.textAlign = "left";
+                ctx.textBaseline = "alphabetic";
+                ctx.fillText(bayCode, x + 6, y + 15);
+
+                if (isOccupied) {
+                    const carColor = colorsPool[index % colorsPool.length];
+                    const carX = x + w / 2;
+                    const carY = y + h / 2;
+                    const plate = slot.vehicle_plate || `TRK-${slot.track_id || (10 + index)}`;
+
+                    if (isVertical) {
+                        drawRealisticCar(ctx, carX, carY, 44, 76, carColor, plate, false, 0);
+                    } else {
+                        const isWestFacing = (bayCode >= "S01" && bayCode <= "S06") || (bayCode >= "S12" && bayCode <= "S16");
+                        const rot = isWestFacing ? Math.PI / 2 : -Math.PI / 2;
+                        drawRealisticCar(ctx, carX, carY, 44, 76, carColor, plate, false, rot);
+                    }
+
+                    if (isHovered) {
+                        ctx.save();
+                        ctx.fillStyle = "#e11d48";
+                        ctx.shadowColor = "rgba(225, 29, 72, 0.4)";
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.roundRect(x + 2, y + h - 20, w - 4, 16, 4);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 8px 'JetBrains Mono', monospace";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText("➔ EXIT", x + w/2, y + h - 12);
+                        ctx.restore();
+                    }
+                } else if (isAllocated) {
+                    ctx.fillStyle = "#0284c7";
+                    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+                    ctx.textAlign = "center";
+                    ctx.fillText("INCOMING", x + w / 2, y + h / 2 - 4);
+                    ctx.fillStyle = "#0369a1";
+                    ctx.font = "bold 8px 'JetBrains Mono', monospace";
+                    ctx.fillText(slot.vehicle_plate || "ASSIGNED", x + w / 2, y + h / 2 + 9);
+                } else {
+                    ctx.fillStyle = "rgba(16, 185, 129, 0.9)";
+                    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+                    ctx.textAlign = "center";
+                    ctx.fillText("FREE", x + w / 2, y + h / 2 + (isVertical ? 10 : 4));
+                }
             }
         });
     }
