@@ -680,20 +680,20 @@ function renderDigitalTwin() {
 
     if (currentFloor === "F1") {
         // =====================================================================
-        // FIRST FLOOR (F1) ARCHITECTURAL LAYOUT (6 SPACIOUS SLOTS LAYOUT)
+        // FIRST FLOOR (F1) ARCHITECTURAL LAYOUT (PROPORTIONAL 6-SLOT BLUEPRINT)
         // =====================================================================
 
         // Top Entry / Exit Highway: x = 0 to 960, y = 15 to 85 (height = 70)
         ctx.fillRect(0, 15, 960, 70);
 
-        // Aisle 1 (Southbound): x = 292 to 372 (width = 80, center = 332)
-        ctx.fillRect(292, 85, 80, 555);
+        // Aisle 1 (Southbound): x = 235 to 335 (width = 100, center = 285)
+        ctx.fillRect(235, 85, 100, 550);
 
-        // Aisle 2 (Northbound toward Exit): x = 588 to 668 (width = 80, center = 628)
-        ctx.fillRect(588, 85, 80, 555);
+        // Aisle 2 (Northbound toward Exit): x = 625 to 725 (width = 100, center = 675)
+        ctx.fillRect(625, 85, 100, 550);
 
-        // Bottom Connector Road: x = 292 to 668, y = 640 to 705 (height = 65)
-        ctx.fillRect(292, 640, 376, 65);
+        // Bottom Connector Road: x = 235 to 725, y = 565 to 635 (height = 70)
+        ctx.fillRect(235, 565, 490, 70);
 
         // Roadway Curbs & Perimeter Markings
         ctx.strokeStyle = "#cbd5e1";
@@ -719,20 +719,20 @@ function renderDigitalTwin() {
 
         // Aisle 1 Centerline (Southbound)
         ctx.beginPath();
-        ctx.moveTo(332, 85);
-        ctx.lineTo(332, 640);
+        ctx.moveTo(285, 85);
+        ctx.lineTo(285, 600);
         ctx.stroke();
 
         // Aisle 2 Centerline (Northbound)
         ctx.beginPath();
-        ctx.moveTo(628, 85);
-        ctx.lineTo(628, 640);
+        ctx.moveTo(675, 85);
+        ctx.lineTo(675, 600);
         ctx.stroke();
 
         // Bottom Connector Road Centerline (Eastbound)
         ctx.beginPath();
-        ctx.moveTo(332, 672);
-        ctx.lineTo(628, 672);
+        ctx.moveTo(285, 600);
+        ctx.lineTo(675, 600);
         ctx.stroke();
         ctx.setLineDash([]);
 
@@ -744,21 +744,23 @@ function renderDigitalTwin() {
 
         // Top Highway Eastbound Arrows
         ctx.fillText("➔", 160, 50);
-        ctx.fillText("➔", 332, 50);
+        ctx.fillText("➔", 285, 50);
         ctx.fillText("➔", 480, 50);
-        ctx.fillText("➔", 628, 50);
-        ctx.fillText("➔", 800, 50);
+        ctx.fillText("➔", 675, 50);
+        ctx.fillText("➔", 820, 50);
 
         // Aisle 1 Southbound Arrows (↓)
-        ctx.fillText("⬇", 332, 220);
-        ctx.fillText("⬇", 332, 410);
+        ctx.fillText("⬇", 285, 220);
+        ctx.fillText("⬇", 285, 380);
+        ctx.fillText("⬇", 285, 500);
 
         // Aisle 2 Northbound Arrows (↑)
-        ctx.fillText("⬆", 628, 410);
-        ctx.fillText("⬆", 628, 220);
+        ctx.fillText("⬆", 675, 500);
+        ctx.fillText("⬆", 675, 380);
+        ctx.fillText("⬆", 675, 220);
 
         // Bottom Connector Road Eastbound Arrow (➔)
-        ctx.fillText("➔", 480, 672);
+        ctx.fillText("➔", 480, 600);
 
         // Gate Badges
         ctx.fillStyle = "#0284c7";
@@ -963,87 +965,155 @@ function renderDigitalTwin() {
                 ctx.setLineDash([]);
                 ctx.restore();
 
-                // Large Bold Slot Number (e.g. 1, 2, 3, 4, 5, 6)
-                ctx.save();
-                ctx.fillStyle = "#0f172a";
-                ctx.font = "bold 44px 'Plus Jakarta Sans', sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(slotNum, x + 48, y + 100);
+                if (isHorizontal) {
+                    // =========================================================
+                    // WIDE LANDSCAPE SLOTS (Slots 3 & 4: 290px x 165px)
+                    // =========================================================
+                    // Large Bold Slot Number
+                    ctx.save();
+                    ctx.fillStyle = "#0f172a";
+                    ctx.font = "bold 44px 'Plus Jakarta Sans', sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(slotNum, x + 55, y + 68);
 
-                // Status Pill Badge (Directly below the number)
-                const pillW = 74;
-                const pillH = 22;
-                const pillX = (x + 48) - pillW / 2;
-                const pillY = (y + 140) - pillH / 2;
+                    // Status Pill Badge
+                    const pillW = 74;
+                    const pillH = 22;
+                    const pillX = (x + 55) - pillW / 2;
+                    const pillY = (y + 104) - pillH / 2;
 
-                ctx.beginPath();
-                ctx.roundRect(pillX, pillY, pillW, pillH, 11);
+                    ctx.beginPath();
+                    ctx.roundRect(pillX, pillY, pillW, pillH, 11);
 
-                if (isOccupied) {
-                    ctx.fillStyle = "#831818"; // Rich dark maroon
-                    ctx.fill();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
-                    ctx.fillText("OCCUPIED", x + 48, y + 140);
-                } else if (isAllocated) {
-                    ctx.fillStyle = "#0284c7"; // Sky Blue
-                    ctx.fill();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.font = "bold 9.5px 'Plus Jakarta Sans', sans-serif";
-                    ctx.fillText("INCOMING", x + 48, y + 140);
-                    // Plate text below pill
-                    ctx.fillStyle = "#0369a1";
-                    ctx.font = "bold 9px 'JetBrains Mono', monospace";
-                    ctx.fillText(slot.vehicle_plate || "ASSIGNED", x + 48, y + 158);
-                } else {
-                    ctx.fillStyle = "#059669"; // Emerald Green
-                    ctx.fill();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
-                    ctx.fillText("FREE", x + 48, y + 140);
-                }
-                ctx.restore();
-
-                // Draw Realistic Parked Car
-                if (isOccupied) {
-                    const defaultPalette = {
-                        "F1-S01": "#38bdf8",
-                        "F1-S02": "#d97706",
-                        "F1-S03": "#ea580c",
-                        "F1-S04": "#94a3b8",
-                        "F1-S05": "#334155",
-                        "F1-S06": "#8b5cf6"
-                    };
-                    const carColor = defaultPalette[slot.id] || colorsPool[index % colorsPool.length];
-                    const plate = slot.vehicle_plate || `S0${slotNum}`;
-
-                    if (isHorizontal) {
-                        const carX = x + 142;
-                        const carY = y + 122;
-                        drawRealisticCar(ctx, carX, carY, 48, 94, carColor, plate, slot.is_ev, Math.PI / 2);
-                    } else {
-                        const carX = x + 146;
-                        const carY = y + 122;
-                        drawRealisticCar(ctx, carX, carY, 48, 94, carColor, plate, slot.is_ev, 0);
-                    }
-
-                    // Hover action pill
-                    if (isHovered) {
-                        ctx.save();
-                        ctx.fillStyle = "#e11d48";
-                        ctx.shadowColor = "rgba(225, 29, 72, 0.4)";
-                        ctx.shadowBlur = 8;
-                        ctx.beginPath();
-                        ctx.roundRect(x + w / 2 - 45, y + h - 28, 90, 20, 6);
+                    if (isOccupied) {
+                        ctx.fillStyle = "#831818";
                         ctx.fill();
-                        ctx.shadowBlur = 0;
                         ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
+                        ctx.fillText("OCCUPIED", x + 55, y + 104);
+                    } else if (isAllocated) {
+                        ctx.fillStyle = "#0284c7";
+                        ctx.fill();
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 9.5px 'Plus Jakarta Sans', sans-serif";
+                        ctx.fillText("INCOMING", x + 55, y + 104);
+                        ctx.fillStyle = "#0369a1";
                         ctx.font = "bold 9px 'JetBrains Mono', monospace";
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "middle";
-                        ctx.fillText("➔ CLICK TO EXIT", x + w / 2, y + h - 18);
-                        ctx.restore();
+                        ctx.fillText(slot.vehicle_plate || "ASSIGNED", x + 55, y + 124);
+                    } else {
+                        ctx.fillStyle = "#059669";
+                        ctx.fill();
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 10px 'Plus Jakarta Sans', sans-serif";
+                        ctx.fillText("FREE", x + 55, y + 104);
+                    }
+                    ctx.restore();
+
+                    // Draw Horizontal Realistic Parked Car
+                    if (isOccupied) {
+                        const defaultPalette = {
+                            "F1-S03": "#ea580c",
+                            "F1-S04": "#94a3b8"
+                        };
+                        const carColor = defaultPalette[slot.id] || colorsPool[index % colorsPool.length];
+                        const plate = slot.vehicle_plate || `S0${slotNum}`;
+                        const carX = x + 185;
+                        const carY = y + 82;
+                        drawRealisticCar(ctx, carX, carY, 46, 92, carColor, plate, slot.is_ev, Math.PI / 2);
+
+                        if (isHovered) {
+                            ctx.save();
+                            ctx.fillStyle = "#e11d48";
+                            ctx.shadowColor = "rgba(225, 29, 72, 0.4)";
+                            ctx.shadowBlur = 8;
+                            ctx.beginPath();
+                            ctx.roundRect(x + w / 2 - 45, y + h - 26, 90, 18, 5);
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+                            ctx.fillStyle = "#ffffff";
+                            ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "middle";
+                            ctx.fillText("➔ CLICK TO EXIT", x + w / 2, y + h - 17);
+                            ctx.restore();
+                        }
+                    }
+                } else {
+                    // =========================================================
+                    // TALL PORTRAIT SLOTS (Slots 1, 2, 5, 6: 160px x 235px)
+                    // =========================================================
+                    // Large Bold Slot Number
+                    ctx.save();
+                    ctx.fillStyle = "#0f172a";
+                    ctx.font = "bold 38px 'Plus Jakarta Sans', sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(slotNum, x + 38, y + 90);
+
+                    // Status Pill Badge
+                    const pillW = 64;
+                    const pillH = 20;
+                    const pillX = (x + 38) - pillW / 2;
+                    const pillY = (y + 128) - pillH / 2;
+
+                    ctx.beginPath();
+                    ctx.roundRect(pillX, pillY, pillW, pillH, 10);
+
+                    if (isOccupied) {
+                        ctx.fillStyle = "#831818";
+                        ctx.fill();
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 9px 'Plus Jakarta Sans', sans-serif";
+                        ctx.fillText("OCCUPIED", x + 38, y + 128);
+                    } else if (isAllocated) {
+                        ctx.fillStyle = "#0284c7";
+                        ctx.fill();
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 8.5px 'Plus Jakarta Sans', sans-serif";
+                        ctx.fillText("INCOMING", x + 38, y + 128);
+                        ctx.fillStyle = "#0369a1";
+                        ctx.font = "bold 8px 'JetBrains Mono', monospace";
+                        ctx.fillText(slot.vehicle_plate || "ASSIGNED", x + 38, y + 146);
+                    } else {
+                        ctx.fillStyle = "#059669";
+                        ctx.fill();
+                        ctx.fillStyle = "#ffffff";
+                        ctx.font = "bold 9px 'Plus Jakarta Sans', sans-serif";
+                        ctx.fillText("FREE", x + 38, y + 128);
+                    }
+                    ctx.restore();
+
+                    // Draw Vertical Realistic Parked Car
+                    if (isOccupied) {
+                        const defaultPalette = {
+                            "F1-S01": "#38bdf8",
+                            "F1-S02": "#d97706",
+                            "F1-S05": "#334155",
+                            "F1-S06": "#8b5cf6"
+                        };
+                        const carColor = defaultPalette[slot.id] || colorsPool[index % colorsPool.length];
+                        const plate = slot.vehicle_plate || `S0${slotNum}`;
+                        const carX = x + 108;
+                        const carY = y + 118;
+                        drawRealisticCar(ctx, carX, carY, 44, 84, carColor, plate, slot.is_ev, 0);
+
+                        if (isHovered) {
+                            ctx.save();
+                            ctx.fillStyle = "#e11d48";
+                            ctx.shadowColor = "rgba(225, 29, 72, 0.4)";
+                            ctx.shadowBlur = 8;
+                            ctx.beginPath();
+                            ctx.roundRect(x + w / 2 - 40, y + h - 26, 80, 18, 5);
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+                            ctx.fillStyle = "#ffffff";
+                            ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "middle";
+                            ctx.fillText("➔ CLICK TO EXIT", x + w / 2, y + h - 17);
+                            ctx.restore();
+                        }
                     }
                 }
             } else {
