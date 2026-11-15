@@ -23,64 +23,69 @@ class ParkingRouter:
         # =====================================================================
         # FLOOR 1 (F1) - Ground Level (6 Spacious Slots Layout)
         # =====================================================================
+        # Top Highway (Eastbound)
         self.nodes['ENTRANCE'] = (0, 50)
-        self.nodes['SLOPE_UP_START'] = (35, 50)
+        self.nodes['SLOPE_UP_START'] = (65, 50)
         self.nodes['F1_TOP_1'] = (285, 50)
         self.nodes['F1_TOP_2'] = (675, 50)
-        self.nodes['SLOPE_DOWN_END'] = (925, 50)
+        self.nodes['SLOPE_DOWN_END'] = (895, 50)
         self.nodes['EXIT'] = (960, 50)
 
-        self._add_edge('ENTRANCE', 'SLOPE_UP_START')
-        self._add_edge('SLOPE_UP_START', 'F1_TOP_1')
-        self._add_edge('F1_TOP_1', 'F1_TOP_2')
-        self._add_edge('F1_TOP_2', 'SLOPE_DOWN_END')
-        self._add_edge('SLOPE_DOWN_END', 'EXIT')
+        self._add_directed_edge('ENTRANCE', 'SLOPE_UP_START')
+        self._add_directed_edge('SLOPE_UP_START', 'F1_TOP_1')
+        self._add_directed_edge('F1_TOP_1', 'F1_TOP_2')
+        self._add_directed_edge('F1_TOP_2', 'SLOPE_DOWN_END')
+        self._add_directed_edge('SLOPE_DOWN_END', 'EXIT')
 
         # F1 Aisle 1 (Southbound): x = 285
-        self.nodes['F1_A1_ROW1'] = (285, 223)
-        self.nodes['F1_A1_ROW2'] = (285, 432)
+        self.nodes['F1_A1_S03'] = (285, 188)
+        self.nodes['F1_A1_S01'] = (285, 222)
+        self.nodes['F1_A1_S04'] = (285, 432)
+        self.nodes['F1_A1_S02'] = (285, 532)
         self.nodes['F1_BTM_1'] = (285, 600)
 
-        self._add_edge('F1_TOP_1', 'F1_A1_ROW1')
-        self._add_edge('F1_A1_ROW1', 'F1_A1_ROW2')
-        self._add_edge('F1_A1_ROW2', 'F1_BTM_1')
+        self._add_edge('F1_TOP_1', 'F1_A1_S03')
+        self._add_edge('F1_A1_S03', 'F1_A1_S01')
+        self._add_edge('F1_A1_S01', 'F1_A1_S04')
+        self._add_edge('F1_A1_S04', 'F1_A1_S02')
+        self._add_edge('F1_A1_S02', 'F1_BTM_1')
 
-        # F1 Bottom Connector Road (Aisle 1 to Aisle 2, Eastbound)
-        self._add_directed_edge('F1_BTM_1', 'F1_BTM_2')
+        # F1 Bottom Connector Road (Aisle 1 to Aisle 2, Bidirectional)
+        self._add_edge('F1_BTM_1', 'F1_BTM_2')
 
-        # F1 Aisle 2 (Strictly Northbound toward exit): x = 675
+        # F1 Aisle 2 (Bidirectional for true shortest paths): x = 675
         self.nodes['F1_BTM_2'] = (675, 600)
-        self.nodes['F1_A2_ROW2'] = (675, 533)
-        self.nodes['F1_A2_ROW1'] = (675, 223)
+        self.nodes['F1_A2_S05'] = (675, 532)
+        self.nodes['F1_A2_S06'] = (675, 222)
 
-        self._add_directed_edge('F1_BTM_2', 'F1_A2_ROW2')
-        self._add_directed_edge('F1_A2_ROW2', 'F1_A2_ROW1')
-        self._add_directed_edge('F1_A2_ROW1', 'F1_TOP_2')
+        self._add_edge('F1_BTM_2', 'F1_A2_S05')
+        self._add_edge('F1_A2_S05', 'F1_A2_S06')
+        self._add_edge('F1_A2_S06', 'F1_TOP_2')
 
-        # F1 Slots 1 to 6 Centers and Connections
-        # Slot 1: Row 1 West (Car vertical at x=185, y=223)
-        self.nodes['F1-S01'] = (185, 223)
-        self._add_edge('F1-S01', 'F1_A1_ROW1')
+        # F1 Slots 1 to 6 Centers and Connections (100% Orthogonal Straight Lines)
+        # Slot 1: Row 1 West (Car vertical at x=155, y=222)
+        self.nodes['F1-S01'] = (155, 222)
+        self._add_edge('F1-S01', 'F1_A1_S01')
 
-        # Slot 2: Row 2 West (Car vertical at x=185, y=533)
-        self.nodes['F1-S02'] = (185, 533)
-        self._add_edge('F1-S02', 'F1_A1_ROW2')
+        # Slot 2: Row 2 West (Car vertical at x=155, y=532)
+        self.nodes['F1-S02'] = (155, 532)
+        self._add_edge('F1-S02', 'F1_A1_S02')
 
-        # Slot 3: Row 1 Center (Car horizontal at x=520, y=187) - Accessible from Aisle 1
-        self.nodes['F1-S03'] = (520, 187)
-        self._add_edge('F1-S03', 'F1_A1_ROW1')
+        # Slot 3: Row 1 Center (Car horizontal at x=480, y=188) - Accessible from Aisle 1
+        self.nodes['F1-S03'] = (480, 188)
+        self._add_edge('F1-S03', 'F1_A1_S03')
 
-        # Slot 4: Row 2 Center (Car horizontal at x=520, y=432) - Accessible from Aisle 1
-        self.nodes['F1-S04'] = (520, 432)
-        self._add_edge('F1-S04', 'F1_A1_ROW2')
+        # Slot 4: Row 2 Center (Car horizontal at x=480, y=432) - Accessible from Aisle 1
+        self.nodes['F1-S04'] = (480, 432)
+        self._add_edge('F1-S04', 'F1_A1_S04')
 
-        # Slot 5: Row 2 East (Car vertical at x=835, y=533)
-        self.nodes['F1-S05'] = (835, 533)
-        self._add_edge('F1-S05', 'F1_A2_ROW2')
+        # Slot 5: Row 2 East (Car vertical at x=805, y=532)
+        self.nodes['F1-S05'] = (805, 532)
+        self._add_edge('F1-S05', 'F1_A2_S05')
 
-        # Slot 6: Row 1 East (Car vertical at x=835, y=223)
-        self.nodes['F1-S06'] = (835, 223)
-        self._add_edge('F1-S06', 'F1_A2_ROW1')
+        # Slot 6: Row 1 East (Car vertical at x=805, y=222)
+        self.nodes['F1-S06'] = (805, 222)
+        self._add_edge('F1-S06', 'F1_A2_S06')
 
         # Backward compatibility aliases for S1..S6 and 1..6
         for i in range(1, 7):

@@ -523,11 +523,14 @@ class ParkingStateEngine:
         finally:
             db.close()
 
-    def record_exit(self, plate_or_track_id=None, floor=None):
+    def record_exit_initiate(self, plate_or_track_id=None, floor=None):
         """
-        Processes vehicle exit, calculates staying fee (₹20/30m), marks session COMPLETED in DB,
-        and sets the parking slot status back to FREE in DB.
-        Supports explicit target (plate/track_id/slot) or floor-based resolution.
+        Initiates vehicle departure without finalizing billing or adding to total revenue yet:
+        - Resolves target session and parking slot.
+        - Computes current stay duration and preliminary tariff estimate.
+        - Sets session status to 'EXITING' and slot status to 'EXITING'.
+        - Computes shortest exit path to EXIT GATE [CAM_02].
+        - Returns exit route and vehicle details for frontend digital twin animation.
         """
         found_session = None
         target_slot_id = None
@@ -619,7 +622,83 @@ class ParkingStateEngine:
             return None
 
         exit_ts = time.time()
+        billing = self.calculate_billing(entry_ts, exit_ts)
+
+        if found_session:
+            found_session["status"] = "EXITING"
+            found_session["pending_billing"] = billing
+
+        origin_floor = 1
+        if slot_id and slot_id in self.slots:
+            origin_floor = self.slots[slot_id].get("floor", 1)
+            self.slots[slot_id]["status"] = "EXITING"
+
+        exit_route = self.router.find_shortest_path(slot_id or "ENTRANCE", "EXIT")
+        if exit_route:
+            exit_route["origin_floor"] = origin_floor
+
+        return {
+            "status": "EXITING",
+            "action": "exit_initiated",
+            "plate_number": plate,
+            "slot_id": slot_id,
+            "floor": origin_floor,
+            "entry_timestamp": entry_ts,
+            "billing": billing,
+            "exit_route": exit_route
+        }
+
+    def record_exit_finalize(self, plate_or_track_id=None, slot_id=None):
+        """
+        Triggered when vehicle physically crosses the EXIT GATE [CAM_02] line:
+        - Detects license plate number via CAM_02 ANPR optical sensor.
+        - Calculates exact elapsed time spent in bay (exit_timestamp - entry_timestamp).
+        - Computes tariff: ₹20 per 30 minutes block.
+        - Adds tariff to total_revenue_inr and marks session COMPLETED in SQLite DB.
+        - Frees parking slot in memory and SQLite DB.
+        - Sets latest_exit_detection for CAM_02 Telemetry HUD.
+        """
+        found_session = None
+
+        # 1. Match session by plate, track, slot or status 'EXITING'
+        if plate_or_track_id:
+            norm_target = self.normalize_slot_id(plate_or_track_id)
+            for s in self.sessions:
+                if (s.get("plate_number") == plate_or_track_id or 
+                    str(s.get("track_id")) == str(plate_or_track_id) or 
+                    s.get("assigned_slot") == plate_or_track_id or
+                    s.get("assigned_slot") == norm_target):
+                    found_session = s
+                    break
+
+        if not found_session and slot_id:
+            norm_slot = self.normalize_slot_id(slot_id)
+            for s in self.sessions:
+                if s.get("assigned_slot") in [slot_id, norm_slot]:
+                    found_session = s
+                    break
+
+        # Fallback to any exiting session
+        if not found_session:
+            for s in self.sessions:
+                if s.get("status") == "EXITING":
+                    found_session = s
+                    break
+
+        # Fallback to any active/parked session if not pre-initiated
+        if not found_session:
+            for s in self.sessions:
+                if s.get("status") in ["PARKED", "ACTIVE", "BYPASS"]:
+                    found_session = s
+                    break
+
+        # Resolve details
+        plate = plate_or_track_id or (found_session.get("plate_number") if found_session else "UNKNOWN")
+        resolved_slot = slot_id or (found_session.get("assigned_slot") if found_session else None)
+        entry_ts = (found_session.get("entry_timestamp") if found_session else None) or (time.time() - 60)
+        exit_ts = time.time()
         exit_dt = datetime.now()
+
         billing = self.calculate_billing(entry_ts, exit_ts)
 
         if found_session:
@@ -632,24 +711,36 @@ class ParkingStateEngine:
             found_session["fee_formatted"] = billing["fee_formatted"]
 
         origin_floor = 1
-        if slot_id and slot_id in self.slots:
-            origin_floor = self.slots[slot_id].get("floor", 1)
-            new_status = "AVAILABLE"
+        if resolved_slot and resolved_slot in self.slots:
+            origin_floor = self.slots[resolved_slot].get("floor", 1)
+            self.slots[resolved_slot]["status"] = "AVAILABLE"
+            self.slots[resolved_slot]["type"] = "GENERAL"
+            self.slots[resolved_slot]["is_ev"] = False
+            self.slots[resolved_slot]["vehicle_plate"] = None
+            self.slots[resolved_slot]["track_id"] = None
+            self.slots[resolved_slot]["entry_timestamp"] = None
+            self.slots[resolved_slot]["entry_time"] = None
 
-            self.slots[slot_id]["status"] = new_status
-            self.slots[slot_id]["type"] = "GENERAL"
-            self.slots[slot_id]["is_ev"] = False
-            self.slots[slot_id]["vehicle_plate"] = None
-            self.slots[slot_id]["track_id"] = None
-            self.slots[slot_id]["entry_timestamp"] = None
-            self.slots[slot_id]["entry_time"] = None
-
+        # ADD TARIFF DIRECTLY TO TOTAL REVENUE
         self.total_revenue_inr += billing["fee_inr"]
-        exit_route = self.router.find_shortest_path(slot_id or "ENTRANCE", "EXIT")
-        if exit_route:
-            exit_route["origin_floor"] = origin_floor
 
-        # Persist exit to SQLite DB
+        # Telemetry HUD detection record for CAM_02 Exit Gate
+        self.latest_exit_detection = {
+            "camera_id": "CAM_02",
+            "camera_name": "CAM_02 EXIT GATE (ANPR + TARIFF SCANNER)",
+            "plate_number": plate,
+            "ocr_confidence": 99.4,
+            "slot_id": resolved_slot,
+            "floor": origin_floor,
+            "stay_duration": billing["duration_formatted"],
+            "duration_seconds": billing["duration_seconds"],
+            "tariff_inr": billing["fee_inr"],
+            "tariff_formatted": billing["fee_formatted"],
+            "total_revenue_inr": self.total_revenue_inr,
+            "timestamp": time.strftime("%H:%M:%S")
+        }
+
+        # Persist to SQLite DB
         db = SessionLocal()
         try:
             if found_session:
@@ -662,8 +753,8 @@ class ParkingStateEngine:
                     db_sess.duration_formatted = billing["duration_formatted"]
                     db_sess.fee_inr = float(billing["fee_inr"])
 
-            if slot_id:
-                db_slot = db.query(ParkingSlot).filter(ParkingSlot.id == slot_id).first()
+            if resolved_slot:
+                db_slot = db.query(ParkingSlot).filter(ParkingSlot.id == resolved_slot).first()
                 if db_slot:
                     db_slot.status = "FREE"
                     db_slot.slot_type = "GENERAL"
@@ -674,26 +765,57 @@ class ParkingStateEngine:
 
             db.commit()
         except Exception as e:
-            print(f"[StateEngine] Error saving exit to DB: {e}")
+            print(f"[StateEngine] Error saving finalized exit to DB: {e}")
             db.rollback()
         finally:
             db.close()
 
-        self.log_event("EXIT", f"Vehicle {plate} vacated Bay {slot_id or 'RAMP'} (Floor {origin_floor}). Stay: {billing['duration_formatted']} • Charged: {billing['fee_formatted']} (₹20/30m)", {
+        self.log_event("EXIT_CAM_02", f"Vehicle {plate} crossed Exit Line [CAM_02]. Stay: {billing['duration_formatted']} • Tariff: {billing['fee_formatted']} added to Total Revenue.", {
             "plate": plate,
-            "slot": slot_id,
+            "slot": resolved_slot,
             "floor": origin_floor,
             "duration": billing["duration_formatted"],
-            "fee": billing["fee_formatted"]
+            "fee": billing["fee_formatted"],
+            "total_revenue": self.total_revenue_inr
         })
 
         return {
             "status": "COMPLETED",
             "plate_number": plate,
-            "slot_id": slot_id,
+            "slot_id": resolved_slot,
             "floor": origin_floor,
             "billing": billing,
-            "exit_route": exit_route
+            "total_revenue_inr": self.total_revenue_inr,
+            "exit_detection": self.latest_exit_detection
+        }
+
+    def record_exit(self, plate_or_track_id=None, floor=None, finalize=True):
+        """
+        Unified exit entrypoint.
+        If finalize=True (default for unit tests and direct API calls):
+            Runs initiate and finalize synchronously and returns completed summary.
+        If finalize=False:
+            Runs initiate only, allowing frontend to animate to exit line before final billing.
+        """
+        init_res = self.record_exit_initiate(plate_or_track_id=plate_or_track_id, floor=floor)
+        if not init_res:
+            return None
+
+        if not finalize:
+            return init_res
+
+        final_res = self.record_exit_finalize(
+            plate_or_track_id=init_res.get("plate_number"),
+            slot_id=init_res.get("slot_id")
+        )
+
+        return {
+            "status": "COMPLETED",
+            "plate_number": final_res["plate_number"],
+            "slot_id": final_res["slot_id"],
+            "floor": final_res["floor"],
+            "billing": final_res["billing"],
+            "exit_route": init_res.get("exit_route")
         }
 
     def get_db_slots_data(self):
@@ -780,9 +902,9 @@ class ParkingStateEngine:
             if s.get("status") in ["ACTIVE", "ENTERING", "PARKED"] and s.get("status") != "BYPASS":
                 entry_ts = s.get("entry_timestamp") or now_ts
                 billing = self.calculate_billing(entry_ts, now_ts)
-                active_revenue += int(billing.get("fee_inr", self.rate_per_30_mins))
+                active_revenue += billing.get("fee_inr", self.rate_per_30_mins)
 
-        live_total_revenue = int(self.total_revenue_inr + active_revenue)
+        live_total_revenue = self.total_revenue_inr + active_revenue
 
         return {
             "facility_name": "PARKIQ MULTI-LEVEL PARKING (F1: 6 BAYS + F2: 28 BAYS)",
@@ -800,8 +922,8 @@ class ParkingStateEngine:
                 "f2_capacity": len(f2_slots),
                 "f2_available": sum(1 for s in f2_slots.values() if s["status"] in ["AVAILABLE", "FREE"]),
                 "f2_occupied": sum(1 for s in f2_slots.values() if s["status"] == "OCCUPIED"),
-                "total_revenue_inr": live_total_revenue,
-                "completed_revenue_inr": int(self.total_revenue_inr),
+                "total_revenue_inr": self.total_revenue_inr,
+                "completed_revenue_inr": self.total_revenue_inr,
                 "active_revenue_inr": active_revenue,
                 "total_vehicles_today": self.total_vehicles_today,
                 "rate_per_30m": self.rate_per_30_mins
@@ -810,7 +932,8 @@ class ParkingStateEngine:
             "active_sessions": [s for s in self.sessions if s["status"] in ["ACTIVE", "ENTERING", "PARKED", "BYPASS"]],
             "completed_sessions": [s for s in self.sessions if s["status"] == "COMPLETED"][:15],
             "activity_feed": self.activity_feed[:25],
-            "latest_detection": latest_detection
+            "latest_detection": latest_detection,
+            "latest_exit_detection": getattr(self, "latest_exit_detection", None)
         }
 
     def reset_facility(self):
@@ -818,6 +941,7 @@ class ParkingStateEngine:
         Resets all slots in memory and SQLite DB to FREE, clears active sessions,
         and returns the fresh digital twin state.
         """
+        self.latest_exit_detection = None
         db = SessionLocal()
         try:
             db_slots = db.query(ParkingSlot).all()

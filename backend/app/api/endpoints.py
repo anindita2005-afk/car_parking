@@ -67,11 +67,26 @@ async def upload_and_detect_vehicle(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Detection error: {str(e)}")
 
-    plate_number = detection["plate_number"]
-    vehicle_type = detection["vehicle_type"]
-    is_ev = detection["is_ev"]
-    ocr_conf = detection["ocr_confidence"]
+    plate_number = detection.get("plate_number")
+    confidence = float(detection.get("confidence", 0.0))
+    ocr_conf = float(detection.get("ocr_confidence", 0.0))
+    vehicle_type = detection.get("vehicle_type", "car")
+    is_ev = detection.get("is_ev", False)
     track_id = int(time.time() * 1000) % 900 + 100
+
+    # If neither vehicle nor plate was detected
+    if (not plate_number or plate_number == "UNKNOWN") and confidence <= 0.05:
+        raise HTTPException(
+            status_code=422,
+            detail="No vehicle or readable license plate detected in uploaded media. Please upload a clear photo or video of a vehicle."
+        )
+
+    # If vehicle was detected but plate was not fully readable, assign guest tag
+    if not plate_number or plate_number == "UNKNOWN":
+        plate_number = f"VISITOR-{track_id}"
+        ocr_conf = 0.50
+        detection["plate_number"] = plate_number
+        detection["ocr_confidence"] = ocr_conf
 
     # Record entry into state engine & digital twin
     session = state_engine.record_entry(
@@ -106,14 +121,30 @@ def update_cv_occupancy(payload: OccupancyUpdatePayload):
     return {"status": "success", "updated_slots": len(payload.slots)}
 
 @router.post("/exit")
-def process_vehicle_exit(plate_or_track_id: str = Query(..., description="Plate number or tracking ID")):
+def process_vehicle_exit(
+    plate_or_track_id: str = Query(..., description="Plate number or tracking ID"),
+    finalize: bool = Query(True, description="Whether to finalize billing immediately or initiate exit animation")
+):
     """
-    Processes vehicle exit, vacates slot, and closes active session.
+    Processes vehicle exit. If finalize is False, initiates departure route and sets status to EXITING.
     """
-    session = state_engine.record_exit(plate_or_track_id)
+    session = state_engine.record_exit(plate_or_track_id, finalize=finalize)
     if not session:
         raise HTTPException(status_code=404, detail="Active vehicle session not found")
     return {"status": "success", "session": session}
+
+@router.post("/exit/finalize")
+def finalize_vehicle_exit(
+    plate_or_track_id: Optional[str] = Query(None, description="Plate number or tracking ID"),
+    slot_id: Optional[str] = Query(None, description="Slot ID to finalize")
+):
+    """
+    Finalizes vehicle exit upon crossing EXIT GATE [CAM_02]: calculates exact stay, tariff, and updates total revenue.
+    """
+    result = state_engine.record_exit_finalize(plate_or_track_id=plate_or_track_id, slot_id=slot_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Active exiting vehicle not found")
+    return {"status": "success", "result": result}
 
 @router.post("/route")
 def calculate_route(payload: RouteRequestPayload):
@@ -151,7 +182,13 @@ def get_parking_analytics():
     }
 
 @router.post("/simulate-event")
-def trigger_simulation_event(action: str = "entry", target: Optional[str] = None, floor: Optional[int] = None):
+def trigger_simulation_event(
+    action: str = "entry",
+    target: Optional[str] = None,
+    floor: Optional[int] = None,
+    finalize: Optional[bool] = None,
+    slot: Optional[str] = None
+):
     """
     Deterministic simulation trigger for testing and demonstration.
     Uses the EXACT same allocation and digital twin state engine.
@@ -190,11 +227,13 @@ def trigger_simulation_event(action: str = "entry", target: Optional[str] = None
     elif action == "park":
         result = state_engine.record_park(target=target, floor=floor)
         return result
-    elif action == "exit":
-        result = state_engine.record_exit(plate_or_track_id=target, floor=floor)
+    elif action in ["exit", "exit_initiate"]:
+        # If finalize is explicitly False or action is exit_initiate, initiate only
+        is_finalize = (finalize is True) if finalize is not None else (action == "exit")
+        result = state_engine.record_exit(plate_or_track_id=target or slot, floor=floor, finalize=is_finalize)
         if result:
             return {
-                "action": "exit",
+                "action": action,
                 "target": target,
                 "floor": result.get("floor", floor or 1),
                 "plate": result.get("plate_number"),
@@ -202,6 +241,15 @@ def trigger_simulation_event(action: str = "entry", target: Optional[str] = None
             }
         floor_msg = f" on Floor {floor}" if floor else ""
         return {"action": "exit", "status": "no_vehicle", "message": f"No active vehicle to exit{floor_msg}"}
+    elif action == "exit_finalize":
+        result = state_engine.record_exit_finalize(plate_or_track_id=target, slot_id=slot)
+        if result:
+            return {
+                "action": "exit_finalize",
+                "target": target,
+                "result": result
+            }
+        return {"action": "exit_finalize", "status": "error", "message": "Could not finalize exit"}
         
     return {"status": "unknown action"}
 

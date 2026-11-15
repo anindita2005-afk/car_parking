@@ -80,12 +80,11 @@ def process_video_feed(video_source, detector, reader, state, slot_manager, came
 
             # Try to read plate if not yet confidently recognized
             if identity is None or identity['confidence'] < 0.60:
-                # Lower half / center of bounding box holds the license plate
-                box_h = y2 - y1
-                y1_crop = max(0, min(int(y1 + box_h * 0.35), h - 1))
-                y2_crop = max(0, min(y2, h - 1))
+                # Extract vehicle crop cleanly without cutting off front grille plates
+                y1_crop = max(0, min(y1, h - 1))
+                y2_crop = max(0, min(y2, h))
                 x1_crop = max(0, min(x1, w - 1))
-                x2_crop = max(0, min(x2, w - 1))
+                x2_crop = max(0, min(x2, w))
 
                 vehicle_crop = frame[y1_crop:y2_crop, x1_crop:x2_crop]
 

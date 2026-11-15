@@ -62,18 +62,21 @@ body.light-glass-theme {
     background: var(--bg-canvas-gradient);
     color: var(--text-heading);
     min-height: 100vh;
-    padding: 16px 20px;
+    padding: 12px 18px;
     overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 /* Main Two-Column Layout (Sidebar + Content) */
 .dashboard-layout {
     display: flex;
-    gap: 20px;
-    max-width: 1780px;
-    margin: 0 auto;
-    min-height: calc(100vh - 32px);
+    gap: 18px;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    min-height: calc(100vh - 24px);
     position: relative;
+    box-sizing: border-box;
 }
 
 /* Glass Card Common Utility */
@@ -696,6 +699,18 @@ body.light-glass-theme {
     display: grid;
     grid-template-columns: 1.55fr 1fr;
     gap: 18px;
+    transition: all 0.3s ease;
+}
+
+/* Full Width Workspace Mode */
+.workspace-grid-two-col.full-width-twin {
+    grid-template-columns: 1fr;
+}
+
+.workspace-grid-two-col.full-width-twin .cv-telemetry-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
 }
 
 @media (max-width: 1300px) {
@@ -706,6 +721,57 @@ body.light-glass-theme {
 
 .digital-twin-panel {
     padding: 22px 24px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Fullscreen Digital Twin (Supports both HTML5 Fullscreen API and CSS Fallback) */
+.digital-twin-panel.is-fullscreen,
+.digital-twin-panel:fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 16px 24px !important;
+    z-index: 999999 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #faf9f6 !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+}
+
+.digital-twin-panel.is-fullscreen .twin-canvas-wrapper,
+.digital-twin-panel:fullscreen .twin-canvas-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: calc(100vh - 125px);
+    border-radius: 14px;
+    background: #faf9f6;
+    overflow: hidden;
+}
+
+.digital-twin-panel.is-fullscreen canvas,
+.digital-twin-panel:fullscreen canvas {
+    max-width: 100%;
+    max-height: calc(100vh - 140px);
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 .panel-header-strip {
@@ -729,6 +795,54 @@ body.light-glass-theme {
     color: var(--text-muted);
     display: block;
     margin-top: 2px;
+}
+
+.twin-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.twin-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.twin-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.twin-action-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}
+
+.twin-action-btn.twin-action-primary {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+}
+
+.twin-action-btn.twin-action-primary:hover {
+    background: #0369a1;
+    border-color: #0369a1;
 }
 
 .twin-legend-row {
@@ -1596,4 +1710,195 @@ canvas {
 .btn-modal-cancel:hover {
     background: #e2e8f0;
     color: #1e293b;
+}
+
+/* ==========================================================================
+   Exit Billing Receipt Toast & Revenue Pulse Animations
+   ========================================================================== */
+.exit-receipt-toast {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    z-index: 100000;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1.5px solid #a7f3d0;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px -8px rgba(16, 185, 129, 0.22), 0 4px 16px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    animation: toastSlideDown 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-24px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.exit-receipt-toast.toast-fade-out {
+    animation: toastFadeOut 0.35s ease forwards;
+}
+
+@keyframes toastFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-16px) scale(0.96);
+    }
+}
+
+.receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-bottom: 1px solid #a7f3d0;
+}
+
+.receipt-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #065f46;
+}
+
+.receipt-icon {
+    font-size: 15px;
+}
+
+.receipt-close-btn {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #047857;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+.receipt-close-btn:hover {
+    background: rgba(4, 120, 87, 0.12);
+}
+
+.receipt-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.receipt-stat-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.receipt-label {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.receipt-val {
+    font-size: 12.5px;
+}
+
+.receipt-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px 12px;
+    background: #fafaf9;
+    border-top: 1px solid #f1f5f9;
+}
+
+.receipt-footer-tag {
+    font-size: 10px;
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.4px;
+}
+
+.receipt-tariff-rate {
+    font-size: 10px;
+    color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.receipt-progress-bar {
+    width: 100%;
+    height: 3px;
+    background: #e2e8f0;
+}
+
+.receipt-progress-fill {
+    height: 100%;
+    background: #10b981;
+    width: 100%;
+    animation: receiptProgress 5.5s linear forwards;
+}
+
+@keyframes receiptProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* Revenue Card Pulse & Floating Badge Animation */
+.kpi-revenue-pulse {
+    animation: kpiPulseGreen 2.2s ease;
+}
+
+@keyframes kpiPulseGreen {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    30% { box-shadow: 0 0 24px 6px rgba(16, 185, 129, 0.35); border-color: #10b981; }
+    100% { box-shadow: var(--card-shadow); }
+}
+
+.revenue-float-badge {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    pointer-events: none;
+    z-index: 10;
+    animation: revenueFloatUp 1.8s ease forwards;
+}
+
+@keyframes revenueFloatUp {
+    0% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.85);
+    }
+    25% {
+        opacity: 1;
+        transform: translateY(-8px) scale(1.1);
+    }
+    75% {
+        opacity: 0.9;
+        transform: translateY(-22px) scale(1.0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-36px) scale(0.9);
+    }
 }

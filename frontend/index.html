@@ -112,8 +112,11 @@
                         </button>
                     </div>
 
-                    <!-- Action Icon Buttons (Search, Notification, Settings) -->
+                    <!-- Action Icon Buttons (Search, Notification, Settings, Fullscreen) -->
                     <div class="header-icon-actions">
+                        <button class="header-circle-btn" onclick="toggleDashboardFullscreen()" title="Toggle Full Screen (F11)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                        </button>
                         <button class="header-circle-btn" title="Search Facility Records">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         </button>
@@ -139,7 +142,7 @@
                         </div>
                     </div>
                     <div class="kpi-main-metric">
-                        <span class="kpi-number" id="kpi-total">28</span>
+                        <span class="kpi-number" id="kpi-total">34</span>
                         <span class="kpi-subtext">Total Configured Bays</span>
                     </div>
                     <div class="kpi-sparkline-container">
@@ -163,7 +166,7 @@
                         </div>
                     </div>
                     <div class="kpi-main-metric">
-                        <span class="kpi-number text-sky" id="kpi-available">28</span>
+                        <span class="kpi-number text-sky" id="kpi-available">34</span>
                         <span class="kpi-subtext">Ready for Allocation</span>
                     </div>
                     <div class="kpi-sparkline-container">
@@ -257,10 +260,22 @@
                             <h3 class="panel-title">LIVE DIGITAL TWIN (2D FACILITY WORLD MODEL)</h3>
                             <span class="panel-subtitle">A* Navigation Route Optimizer & Dynamic Vehicle Positioning • <strong style="color: #0284c7;">💡 Click any parked vehicle to exit it</strong></span>
                         </div>
-                        <div class="twin-legend-row">
-                            <span class="legend-badge"><span class="legend-dot dot-avail"></span> Free (Available)</span>
-                            <span class="legend-badge"><span class="legend-dot dot-occ"></span> Occupied (Parked)</span>
-                            <span class="legend-badge"><span class="legend-dot dot-route"></span> A* Route</span>
+                        <div class="twin-header-actions">
+                            <div class="twin-legend-row">
+                                <span class="legend-badge"><span class="legend-dot dot-avail"></span> Free (Available)</span>
+                                <span class="legend-badge"><span class="legend-dot dot-occ"></span> Occupied (Parked)</span>
+                                <span class="legend-badge"><span class="legend-dot dot-route"></span> A* Route</span>
+                            </div>
+                            <div class="twin-btn-group">
+                                <button class="twin-action-btn" id="btn-twin-expand" onclick="toggleTwinExpand()" title="Toggle Digital Twin Full Width">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                                    <span id="twin-expand-text">Full Width</span>
+                                </button>
+                                <button class="twin-action-btn twin-action-primary" id="btn-twin-fullscreen" onclick="toggleTwinFullscreen()" title="Full Screen Digital Twin (Press Esc to exit)">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                                    <span id="twin-fs-text">Full Screen</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

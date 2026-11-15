@@ -48,12 +48,15 @@ def generate_realistic_car_image(plate_text="MH12DE1433", is_ev=False, output_pa
     cv2.circle(img, (450, 360), 18, (180, 180, 180), -1)
 
     # License Plate Mount (White or Green EV plate)
-    plate_bg = (245, 245, 245) if not is_ev else (100, 200, 100)
-    cv2.rectangle(img, (250, 295), (390, 340), plate_bg, -1)
-    cv2.rectangle(img, (250, 295), (390, 340), (0, 0, 0), 2)
+    plate_bg = (250, 250, 250) if not is_ev else (80, 200, 80)
+    cv2.rectangle(img, (245, 295), (395, 340), plate_bg, -1)
+    cv2.rectangle(img, (245, 295), (395, 340), (0, 0, 0), 2)
 
-    # Plate Text
-    cv2.putText(img, plate_text, (260, 328), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 0), 2, cv2.LINE_AA)
+    # Blue HSRP 'IND' strip on left edge
+    cv2.rectangle(img, (245, 295), (262, 340), (200, 100, 20), -1)
+
+    # Plate Text with clean spacing
+    cv2.putText(img, plate_text, (268, 327), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (10, 10, 10), 2, cv2.LINE_AA)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     cv2.imwrite(output_path, img)

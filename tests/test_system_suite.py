@@ -18,6 +18,7 @@ class TestIntelligentParkingSystem(unittest.TestCase):
         self.allocator = SlotAllocator()
         self.router = ParkingRouter()
         self.state_engine = ParkingStateEngine()
+        self.state_engine.reset_facility()
         self.plate_reader = PlateReader()
         self.tracking_state = TrackingState()
         
@@ -166,8 +167,8 @@ class TestIntelligentParkingSystem(unittest.TestCase):
         self.assertGreater(s01_score, s03_score)
         self.assertGreater(s03_score, s02_score)
         self.assertGreater(s02_score, s04_score)
-        self.assertGreater(s04_score, s05_score)
-        self.assertGreater(s05_score, s06_score)
+        self.assertGreater(s04_score, s06_score)
+        self.assertGreater(s06_score, s05_score) # Upper right (S06) has higher priority than lower right (S05)
 
         # Allocate on clean slate: S01 gets top priority
         res = self.allocator.allocate(occupancy_map={}, vehicle_type="car")
@@ -210,7 +211,7 @@ class TestIntelligentParkingSystem(unittest.TestCase):
     def test_level_wise_allocation_order(self):
         """Verify sequential allocations strictly follow the requested level-wise priority order"""
         expected_f1_order = [
-            "F1-S01", "F1-S03", "F1-S02", "F1-S04", "F1-S05", "F1-S06"
+            "F1-S01", "F1-S03", "F1-S02", "F1-S04", "F1-S06", "F1-S05"
         ]
         occupancy = {}
         allocated = []

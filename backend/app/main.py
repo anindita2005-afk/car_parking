@@ -15,6 +15,7 @@ from app.core.database import engine, Base
 
 # Initialize DB tables
 Base.metadata.create_all(bind=engine)
+# Updated router reload timestamp: 2026-11-14 exit-line-detection-and-tariff
 
 app = FastAPI(
     title="Intelligent Parking Management System API",
@@ -32,6 +33,18 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api")
+
+@app.on_event("startup")
+def warmup_cv_pipeline():
+    """Non-blocking background thread to pre-warm YOLO and EasyOCR models on startup."""
+    import threading
+    def _warmup():
+        try:
+            from app.services.car_detector import car_detector
+            car_detector._get_ocr_reader()
+        except Exception:
+            pass
+    threading.Thread(target=_warmup, daemon=True).start()
 
 # Mount frontend directory for direct dashboard serving
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))

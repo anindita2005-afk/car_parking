@@ -21,7 +21,7 @@ OCR_DIGIT_MAP = {
     'S': '5', 'B': '8', 'E': '3', 'A': '4', 'G': '6'
 }
 OCR_LETTER_MAP = {
-    '0': 'O', '1': 'I', '2': 'Z', '5': 'S', '8': 'B'
+    '0': 'O', '1': 'I', '2': 'Z', '3': 'E', '4': 'A', '5': 'S', '6': 'G', '8': 'B'
 }
 
 # State prefix disambiguation table:
@@ -138,13 +138,16 @@ class PlateReader:
             return None
 
         # Strip leading IND / country prefix (from blue HSRP emblem on left)
-        if clean.startswith('IND') and len(clean) >= 9:
+        if clean.startswith('IND') and len(clean) >= 8:
             clean = clean[3:]
-        elif clean.startswith('ND') and len(clean) >= 8 and clean[2:4] in VALID_STATE_PREFIXES:
+        elif clean.startswith('ND') and len(clean) >= 8 and (clean[2:4] in VALID_STATE_PREFIXES or clean[2:4] in STATE_PREFIX_CORRECTIONS):
             clean = clean[2:]
-        elif len(clean) >= 9 and clean[0] in ['I', '1', 'T', 'D'] and clean[1:3] in VALID_STATE_PREFIXES:
-            # Single noise char before valid state prefix (e.g. '1MH12...')
+        elif len(clean) >= 9 and clean[0] in ['I', '1', 'T', 'D'] and (clean[1:3] in VALID_STATE_PREFIXES or clean[1:3] in STATE_PREFIX_CORRECTIONS):
             clean = clean[1:]
+
+        # Prune trailing single noise char if preceded by 4 digits and length >= 11 (screw/border)
+        if len(clean) >= 11:
+            clean = re.sub(r'^([A-Z0-9]{2}[0-9OQLIZSBGA]{1,2}[A-Z0-9]{1,3}[0-9OQLIZSBEA]{4})[0-9A-Z]$', r'\1', clean)
 
         # Apply 3-char prefix corrections first (e.g. '11H', 'IIH', 'RNH')
         for p3, repl in STATE_PREFIX_CORRECTIONS.items():
@@ -157,30 +160,57 @@ class PlateReader:
             clean = STATE_PREFIX_CORRECTIONS[clean[:2]] + clean[2:]
 
         # Series 'M' character disambiguation:
-        # If 'M' was split into '11', 'II', 'IVI', or 'RN' in the series
-        # 1. State + Dist + (11|II|IVI|RN) + 4 digits -> M + 4 digits
         clean = re.sub(r'^([A-Z]{2}[0-9OQLIZSBG]{1,2})(?:11|II|IVI|RN)([0-9OQLIZSBEA]{4})$', r'\g<1>M\2', clean)
-        # 2. State + Dist + (11|II|IVI|RN) + SeriesLetter + 4 digits -> M + SeriesLetter + 4 digits
         clean = re.sub(r'^([A-Z]{2}[0-9OQLIZSBG]{1,2})(?:11|II|IVI|RN)([A-Z][0-9OQLIZSBEA]{4})$', r'\g<1>M\2', clean)
-        # 3. State + Dist + SeriesLetter + (11|II|IVI|RN) + 4 digits -> SeriesLetter + M + 4 digits
         clean = re.sub(r'^([A-Z]{2}[0-9OQLIZSBG]{1,2}[A-Z])(?:11|II|IVI|RN)([0-9OQLIZSBEA]{4})$', r'\g<1>M\2', clean)
 
-        # 1. Bharat Series: YY BH NNNN XX (with trailing noise pruning)
+        # 1. Bharat Series: YY BH NNNN XX
         m_bh = re.search(r'([0-9]{2})\s*BH\s*([0-9]{4})\s*([A-Z]{1,2})', clean)
         if m_bh:
             return f'{m_bh.group(1)}BH{m_bh.group(2)}{m_bh.group(3)}'
 
-        # 2. Standard Indian Plate with 4 pure digits (State + Dist + Series + Number)
-        # Strips trailing noise artifacts (e.g. '7' in 'HR26DC01657' from plate frame or right edge screw)
-        m_std = re.search(r'([A-Z]{2})\s*([0-9]{1,2})\s*([A-Z]{1,3})\s*([0-9]{4})', clean)
-        if m_std and m_std.group(1) in VALID_STATE_PREFIXES:
-            return ''.join(m_std.groups())
+        # 2. Pure Standard Indian Plate with pure digits and letters (check first!)
+        m_pure = re.search(r'^([A-Z]{2})([0-9]{2})([A-Z]{1,3})([0-9]{4})$', clean)
+        if m_pure and m_pure.group(1) in VALID_STATE_PREFIXES:
+            return ''.join(m_pure.groups())
 
-        # 3. Standard Indian Plate with OCR character confusion in digits/state
-        # Handles cases where '0' was read as 'O', '1' as 'I', etc.
-        m_std_conf = re.search(r'([A-Z0-9]{2})\s*([0-9OQLIZSBG]{1,2})\s*([A-Z]{1,3})\s*([0-9OQLIZSBEA]{4})', clean)
-        if m_std_conf:
-            st, dist, ser, num = m_std_conf.groups()
+        # 3. Standard 10-char plate: 2 state letters + 2 district digits + 2 series letters + 4 number digits
+        if len(clean) == 10:
+            st = clean[:2]
+            dist = clean[2:4]
+            ser = clean[4:6]
+            num = clean[6:10]
+            st_clean = ''.join(OCR_LETTER_MAP.get(c, c) for c in st)
+            if st_clean in STATE_PREFIX_CORRECTIONS:
+                st_clean = STATE_PREFIX_CORRECTIONS[st_clean]
+            if st_clean in VALID_STATE_PREFIXES:
+                dist_clean = ''.join(OCR_DIGIT_MAP.get(c, c) for c in dist)
+                ser_clean = ''.join(OCR_LETTER_MAP.get(c, c) for c in ser)
+                num_clean = ''.join(OCR_DIGIT_MAP.get(c, c) for c in num)
+                return f'{st_clean}{dist_clean}{ser_clean}{num_clean}'
+
+        # 4. Standard 9-char plate: e.g. State(2) + Dist(2) + Series(1) + Num(4) or State(2) + Dist(1) + Series(2) + Num(4)
+        if len(clean) == 9:
+            st = clean[:2]
+            st_clean = ''.join(OCR_LETTER_MAP.get(c, c) for c in st)
+            if st_clean in STATE_PREFIX_CORRECTIONS:
+                st_clean = STATE_PREFIX_CORRECTIONS[st_clean]
+            if st_clean in VALID_STATE_PREFIXES:
+                dist_a = ''.join(OCR_DIGIT_MAP.get(c, c) for c in clean[2:4])
+                ser_a = ''.join(OCR_LETTER_MAP.get(c, c) for c in clean[4:5])
+                num_a = ''.join(OCR_DIGIT_MAP.get(c, c) for c in clean[5:9])
+                if dist_a.isdigit() and ser_a.isalpha() and num_a.isdigit():
+                    return f'{st_clean}{dist_a}{ser_a}{num_a}'
+                dist_b = ''.join(OCR_DIGIT_MAP.get(c, c) for c in clean[2:3])
+                ser_b = ''.join(OCR_LETTER_MAP.get(c, c) for c in clean[3:5])
+                num_b = ''.join(OCR_DIGIT_MAP.get(c, c) for c in clean[5:9])
+                if dist_b.isdigit() and ser_b.isalpha() and num_b.isdigit():
+                    return f'{st_clean}{dist_b}{ser_b}{num_b}'
+
+        # 5. Regex search fallback for variable length plates
+        m_std = re.search(r'([A-Z0-9]{2})\s*([0-9OQLIZSBGA]{1,2})\s*([A-Z]{1,3})\s*([0-9OQLIZSBEA]{3,4})', clean)
+        if m_std:
+            st, dist, ser, num = m_std.groups()
             st_clean = ''.join(OCR_LETTER_MAP.get(c, c) for c in st)
             if st_clean in STATE_PREFIX_CORRECTIONS:
                 st_clean = STATE_PREFIX_CORRECTIONS[st_clean]
@@ -188,11 +218,6 @@ class PlateReader:
                 dist_clean = ''.join(OCR_DIGIT_MAP.get(c, c) for c in dist)
                 num_clean = ''.join(OCR_DIGIT_MAP.get(c, c) for c in num)
                 return f'{st_clean}{dist_clean}{ser}{num_clean}'
-
-        # 4. Standard Indian Plate with 1-3 digits (VIP / vintage / commercial)
-        m_short = re.search(r'([A-Z]{2})\s*([0-9]{1,2})\s*([A-Z]{0,2})\s*([0-9]{1,3})', clean)
-        if m_short and m_short.group(1) in VALID_STATE_PREFIXES:
-            return ''.join(m_short.groups())
 
         # Fallback to positional disambiguation
         chars = list(clean)
@@ -308,6 +333,67 @@ class PlateReader:
 
         return candidates
 
+    def _find_plate_rois(self, image):
+        """
+        Locates candidate plate regions within a vehicle crop using:
+        1. Sobel-X vertical morphological gradient + rectangular contour extraction
+        2. Lower bumper region (35% to 95% of vehicle height)
+        3. Middle grille region (20% to 75% of vehicle height)
+        4. Full vehicle crop
+        """
+        rois = []
+        if image is None or image.size == 0:
+            return rois
+
+        vh, vw = image.shape[:2]
+
+        # 1. Sobel-X Morphological Gradient Plate Localization
+        try:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+            gradX = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
+            gradX = np.absolute(gradX)
+            minVal, maxVal = float(np.min(gradX)), float(np.max(gradX))
+            if maxVal > minVal:
+                gradX = (255 * ((gradX - minVal) / (maxVal - minVal))).astype("uint8")
+            else:
+                gradX = np.zeros_like(gray, dtype=np.uint8)
+            gradX = cv2.GaussianBlur(gradX, (5, 5), 0)
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (17, 3))
+            closed = cv2.morphologyEx(gradX, cv2.MORPH_CLOSE, kernel)
+            _, thresh = cv2.threshold(closed, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+            contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            for c in contours:
+                cx, cy, cw, ch = cv2.boundingRect(c)
+                aspect = cw / float(ch) if ch > 0 else 0
+                area = cw * ch
+                if 2.0 <= aspect <= 6.5 and cw >= 35 and ch >= 12 and area <= (vw * vh * 0.40):
+                    px1 = max(0, cx - 6)
+                    py1 = max(0, cy - 4)
+                    px2 = min(vw, cx + cw + 6)
+                    py2 = min(vh, cy + ch + 4)
+                    crop = image[py1:py2, px1:px2]
+                    if crop.size > 0:
+                        rois.append((crop, px1, py1))
+        except Exception:
+            pass
+
+        # 2. Targeted lower-half bumper zone
+        if vh >= 60 and vw >= 60:
+            y1_bumper = int(vh * 0.35)
+            y2_bumper = int(vh * 0.95)
+            rois.append((image[y1_bumper:y2_bumper, 0:vw], 0, y1_bumper))
+
+        # 3. Middle grille zone
+        if vh >= 80 and vw >= 80:
+            y1_mid = int(vh * 0.20)
+            y2_mid = int(vh * 0.70)
+            rois.append((image[y1_mid:y2_mid, 0:vw], 0, y1_mid))
+
+        # 4. Full vehicle crop
+        rois.append((image, 0, 0))
+        return rois
+
     def read_plate(self, image):
         """
         Extracts license plate number and confidence score from a cropped vehicle image.
@@ -320,34 +406,25 @@ class PlateReader:
         if not reader:
             return None, 0.0
 
-        vh, vw = image.shape[:2]
-        rois = []
-        if vh >= 60 and vw >= 60:
-            roi_y = int(vh * 0.35)
-            rois.append((image[roi_y:vh, 0:vw], 0, roi_y))
-        rois.append((image, 0, 0))
-
+        rois = self._find_plate_rois(image)
         allowlist_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         all_candidates = []
 
         for roi_img, off_x, off_y in rois:
             rh, rw = roi_img.shape[:2]
-            if rh < 20 or rw < 40:
+            if rh < 14 or rw < 35:
                 continue
 
-            scale = max(2.0, 320.0 / max(rw, 1))
+            scale = max(1.5, 80.0 / max(rh, 1))
             target_w = int(rw * scale)
             target_h = int(rh * scale)
             upscaled = cv2.resize(roi_img, (target_w, target_h), interpolation=cv2.INTER_CUBIC)
 
-            # Pass A: Adaptive thresholding
-            gray_up = cv2.cvtColor(upscaled, cv2.COLOR_BGR2GRAY) if len(upscaled.shape) == 3 else upscaled
-            thresh = cv2.adaptiveThreshold(gray_up, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 5)
-
+            # Pass 1: Raw / Enhanced RGB
             try:
-                res_thresh = reader.readtext(thresh, allowlist=allowlist_chars, detail=1)
+                res_rgb = reader.readtext(upscaled, allowlist=allowlist_chars, detail=1)
                 res_rescaled = []
-                for (b, t, c) in res_thresh:
+                for (b, t, c) in res_rgb:
                     pts = np.array(b, dtype=np.float32) / scale
                     res_rescaled.append((pts.tolist(), t, c))
                 boxes_assembled = self._assemble_text_boxes(res_rescaled, off_x, off_y)
@@ -355,11 +432,12 @@ class PlateReader:
             except Exception:
                 pass
 
-            if any(self.score_plate_candidate(c["text"], c["conf"]) > 75 for c in all_candidates):
+            if any(self.score_plate_candidate(c["text"], c["conf"]) > 80 for c in all_candidates):
                 break
 
-            # Pass B: Contrast / CLAHE
+            # Pass 2: Contrast / CLAHE
             try:
+                gray_up = cv2.cvtColor(upscaled, cv2.COLOR_BGR2GRAY) if len(upscaled.shape) == 3 else upscaled
                 clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
                 contrast = clahe.apply(gray_up)
                 denoised = cv2.bilateralFilter(contrast, 7, 50, 50)
@@ -373,7 +451,24 @@ class PlateReader:
             except Exception:
                 pass
 
-            if any(self.score_plate_candidate(c["text"], c["conf"]) > 75 for c in all_candidates):
+            if any(self.score_plate_candidate(c["text"], c["conf"]) > 80 for c in all_candidates):
+                break
+
+            # Pass 3: Adaptive thresholding
+            try:
+                gray_up = cv2.cvtColor(upscaled, cv2.COLOR_BGR2GRAY) if len(upscaled.shape) == 3 else upscaled
+                thresh = cv2.adaptiveThreshold(gray_up, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 5)
+                res_thresh = reader.readtext(thresh, allowlist=allowlist_chars, detail=1)
+                res_rescaled = []
+                for (b, t, c) in res_thresh:
+                    pts = np.array(b, dtype=np.float32) / scale
+                    res_rescaled.append((pts.tolist(), t, c))
+                boxes_assembled = self._assemble_text_boxes(res_rescaled, off_x, off_y)
+                all_candidates.extend(boxes_assembled)
+            except Exception:
+                pass
+
+            if any(self.score_plate_candidate(c["text"], c["conf"]) > 80 for c in all_candidates):
                 break
 
         if not all_candidates:
