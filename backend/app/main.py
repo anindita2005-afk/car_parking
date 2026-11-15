@@ -8,8 +8,6 @@ if BACKEND_ROOT not in sys.path:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
 from app.api.endpoints import router as api_router
 from app.core.database import engine, Base
 
@@ -46,21 +44,13 @@ def warmup_cv_pipeline():
             pass
     threading.Thread(target=_warmup, daemon=True).start()
 
-# Mount frontend directory for direct dashboard serving
-FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))
-if os.path.exists(FRONTEND_DIR):
-    app.mount("/dashboard", StaticFiles(directory=FRONTEND_DIR, html=True), name="dashboard")
-
 @app.get("/")
 def root():
-    # If dashboard exists, redirect directly to dashboard
-    if os.path.exists(FRONTEND_DIR):
-        return RedirectResponse(url="/dashboard/index.html")
     return {
-        "system": "Intelligent Parking Management System (IPMS)",
+        "system": "Intelligent Parking Management System (IPMS) Backend API",
         "status": "ONLINE",
         "api_docs": "/docs",
-        "dashboard": "/dashboard/index.html"
+        "frontend": "http://localhost:5173"
     }
 
 if __name__ == "__main__":
