@@ -38,9 +38,14 @@ function calculateLiveFee(entryTimestamp, ratePer30m = 20) {
     return { fee, formatted: `₹${fee}` };
 }
 
-// Live Clock
+// Live Clock & Dynamic Real-Time Date
 function updateClock() {
     const now = new Date();
+    const dateEl = document.getElementById("header-date-str");
+    if (dateEl) {
+        const options = { weekday: "long", year: "numeric", month: "short", day: "numeric" };
+        dateEl.innerText = now.toLocaleDateString("en-US", options);
+    }
     const clockEl = document.getElementById("live-clock");
     if (clockEl) {
         clockEl.innerText = now.toLocaleTimeString();
